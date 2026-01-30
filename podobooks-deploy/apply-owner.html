@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>점주 신청 - 포도책방</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.7;
+            color: #333;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        
+        /* 헤더 */
+        header {
+            background: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            text-decoration: none;
+        }
+        
+        .back-link {
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .back-link:hover {
+            color: #333;
+        }
+        
+        /* 히어로 */
+        .hero {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+                        url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=1920&q=80') center/cover;
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+        
+        .hero p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        /* 메인 컨텐츠 */
+        .main {
+            max-width: 900px;
+            margin: -40px auto 60px;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        /* 혜택 카드 */
+        .benefits {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .benefits h2 {
+            font-size: 22px;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .benefit-item {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .benefit-icon {
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+        
+        .benefit-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .benefit-desc {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* 신청 폼 */
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .form-card h2 {
+            font-size: 22px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+        
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #333;
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .form-submit {
+            width: 100%;
+            padding: 16px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .form-submit:hover {
+            background: #555;
+        }
+        
+        .form-note {
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        /* 비용 안내 */
+        .pricing-info {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .pricing-info h3 {
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: #333;
+        }
+        
+        .pricing-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        
+        .pricing-row:last-child {
+            border-bottom: none;
+        }
+        
+        .pricing-row span:last-child {
+            font-weight: 600;
+        }
+        
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .main {
+                grid-template-columns: 1fr;
+                margin-top: -30px;
+            }
+            
+            .hero {
+                padding: 60px 20px;
+            }
+            
+            .hero h1 {
+                font-size: 28px;
+            }
+            
+            .benefits,
+            .form-card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">🍇 포도책방</a>
+            <a href="index.html" class="back-link">← 메인으로</a>
+        </div>
+    </header>
+    
+    <section class="hero">
+        <h1>점주 신청</h1>
+        <p>내 책장 하나로 책방 주인이 되세요</p>
+    </section>
+    
+    <main class="main">
+        <div class="benefits">
+            <h2>🎁 점주 혜택</h2>
+            
+            <div class="benefit-item">
+                <div class="benefit-icon">💰</div>
+                <div>
+                    <div class="benefit-title">월 3천원부터 시작</div>
+                    <div class="benefit-desc">미니 책장 기준 커피 한 잔 가격으로 나만의 책방을 가질 수 있어요.</div>
+                </div>
+            </div>
+            
+            <div class="benefit-item">
+                <div class="benefit-icon">📚</div>
+                <div>
+                    <div class="benefit-title">책이 없어도 OK</div>
+                    <div class="benefit-desc">직접 만든 굿즈, 소품, 그림도 판매 가능. 나만의 공간으로 꾸며보세요.</div>
+                </div>
+            </div>
+            
+            <div class="benefit-item">
+                <div class="benefit-icon">⏰</div>
+                <div>
+                    <div class="benefit-title">운영은 책방에서</div>
+                    <div class="benefit-desc">판매, 정산, 관리 모두 대행. 한 달에 한 번 책장 정리만 하면 돼요.</div>
+                </div>
+            </div>
+            
+            <div class="benefit-item">
+                <div class="benefit-icon">💵</div>
+                <div>
+                    <div class="benefit-title">수익 50~100%</div>
+                    <div class="benefit-desc">헌책 50%, 새책 85~100% 점주 수익. 매월 정산해드려요.</div>
+                </div>
+            </div>
+            
+            <div class="benefit-item">
+                <div class="benefit-icon">🌱</div>
+                <div>
+                    <div class="benefit-title">문화 커뮤니티</div>
+                    <div class="benefit-desc">독서모임, 북콘서트, 작가와의 만남 등 다양한 활동에 참여하세요.</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-card">
+            <h2>📝 신청서 작성</h2>
+            
+            <div class="pricing-info">
+                <h3>📌 책장 임대료</h3>
+                <div class="pricing-row">
+                    <span>미니 책장</span>
+                    <span>월 3,000원</span>
+                </div>
+                <div class="pricing-row">
+                    <span>작은 책장</span>
+                    <span>월 10,000원</span>
+                </div>
+                <div class="pricing-row">
+                    <span>큰 책장</span>
+                    <span>월 20,000원</span>
+                </div>
+                <div class="pricing-row">
+                    <span>평대</span>
+                    <span>월 30,000원</span>
+                </div>
+            </div>
+            
+            <form>
+                <div class="form-group">
+                    <label class="form-label">이름 *</label>
+                    <input type="text" class="form-input" placeholder="홍길동" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">연락처 *</label>
+                    <input type="tel" class="form-input" placeholder="010-1234-5678" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">이메일</label>
+                    <input type="email" class="form-input" placeholder="email@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">희망 지점 *</label>
+                    <select class="form-select" required>
+                        <option value="">선택해주세요</option>
+                        <option value="mokpo">목포점</option>
+                        <option value="ganghwa">강화점</option>
+                        <option value="gwangju">광주점 (오픈예정)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">희망 책장 크기</label>
+                    <select class="form-select">
+                        <option value="">선택해주세요</option>
+                        <option value="mini">미니 책장 (월 3천원)</option>
+                        <option value="small">작은 책장 (월 1만원)</option>
+                        <option value="large">큰 책장 (월 2만원)</option>
+                        <option value="flat">평대 (월 3만원)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">하고 싶은 말</label>
+                    <textarea class="form-textarea" placeholder="자기소개, 판매하고 싶은 책/굿즈 등 자유롭게 작성해주세요"></textarea>
+                </div>
+                
+                <button type="submit" class="form-submit">점주 신청하기</button>
+            </form>
+            
+            <p class="form-note">* 신청 후 담당자가 1~2일 내 연락드립니다.</p>
+        </div>
+    </main>
+    
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('신청이 완료되었습니다! 담당자가 곧 연락드릴게요 🍇');
+        });
+    </script>
+</body>
+</html>

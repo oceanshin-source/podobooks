@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>포도책방 - 점주 로그인</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{--grape-900:#1a0a2e;--grape-700:#4a2c7a;--grape-600:#5e3d8c;--grape-500:#7c4dff;--grape-100:#e9d8fd;--grape-50:#f5f0ff;--text-light:#666;--success:#10b981}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Pretendard',sans-serif;background:linear-gradient(135deg,var(--grape-900),var(--grape-700));min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+        .back{position:absolute;top:2rem;left:2rem;color:white;text-decoration:none;opacity:0.8}
+        .login-box{background:white;border-radius:20px;padding:2.5rem;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .login-header{text-align:center;margin-bottom:2rem}
+        .login-icon{width:70px;height:70px;margin:0 auto 1rem;background:linear-gradient(135deg,#10b981,#059669);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.8rem}
+        .login-title{font-family:'Noto Serif KR',serif;font-size:1.5rem;font-weight:700;color:var(--grape-900)}
+        .login-subtitle{color:var(--text-light);font-size:0.9rem}
+        .form-group{margin-bottom:1rem}
+        .form-label{display:block;font-weight:600;color:var(--grape-900);margin-bottom:0.4rem;font-size:0.85rem}
+        .form-input{width:100%;padding:0.85rem 1rem;border:2px solid var(--grape-100);border-radius:10px;font-size:0.95rem;background:var(--grape-50)}
+        .form-input:focus{outline:none;border-color:var(--grape-500);background:white}
+        .form-check{display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--text-light);margin:1rem 0}
+        .login-btn{width:100%;padding:1rem;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer}
+        .login-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(16,185,129,0.4)}
+        .login-links{text-align:center;margin-top:1rem;font-size:0.85rem}
+        .login-links a{color:var(--grape-600);margin:0 0.5rem}
+        .error-msg{color:#ef4444;font-size:0.85rem;margin-top:0.5rem;display:none}
+        .ad-section{margin-top:1.5rem;padding:1rem;background:#f8f9fa;border-radius:10px;text-align:center;border:1px dashed #dee2e6}
+        .ad-label{font-size:0.65rem;color:#adb5bd;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.5rem}
+        .ad-btns{display:flex;gap:0.5rem;justify-content:center}
+        .ad-btn{padding:0.6rem 1rem;border-radius:6px;font-size:0.8rem;text-decoration:none}
+        .ad-coupang{background:#e31937;color:white}
+        .ad-google{background:white;border:1px solid #4285f4;color:#4285f4}
+        .toast{position:fixed;top:2rem;right:2rem;padding:1rem 1.5rem;background:white;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,0.15);display:none;z-index:100}
+        .toast.show{display:flex;align-items:center;gap:0.5rem}
+        .toast.success{border-left:4px solid #10b981}
+        .toast.error{border-left:4px solid #ef4444}
+        .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center}
+        .modal-overlay.active{display:flex}
+        .btn-secondary{background:white;color:var(--grape-700);border:1px solid var(--grape-300);cursor:pointer;border-radius:8px;font-weight:600}
+        .toast.error{border-left:4px solid #ef4444}
+    </style>
+</head>
+<body>
+    <div class="toast" id="toast"></div>
+    <a href="index.html" class="back">← 홈으로</a>
+    <div class="login-box">
+        <div class="login-header">
+            <div class="login-icon">📚</div>
+            <h1 class="login-title">서가 점주</h1>
+            <p class="login-subtitle">내 서가 관리 시스템</p>
+        </div>
+        <form onsubmit="return handleLogin(event)">
+            <div class="form-group">
+                <label class="form-label">휴대폰 번호</label>
+                <input type="tel" class="form-input" id="ownerPhone" placeholder="010-0000-0000" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">비밀번호</label>
+                <input type="password" class="form-input" id="ownerPw" placeholder="••••••••" required>
+                <p class="error-msg" id="errorMsg">연락처 또는 비밀번호가 틀립니다.</p>
+            </div>
+            <label class="form-check"><input type="checkbox"> 로그인 상태 유지</label>
+            <button type="submit" class="login-btn">로그인</button>
+        </form>
+        <div class="login-links"><a href="#" onclick="openModal('registerModal')">회원가입</a> | <a href="#" onclick="alert('등록된 연락처로 임시 비밀번호가 발송됩니다.\n(데모에서는 기본 비밀번호 1234 사용)')">비밀번호 찾기</a></div>
+        <p style="text-align:center;margin-top:1rem;font-size:0.8rem;color:var(--text-light)">테스트: 010-1234-5678 / 1234</p>
+        <div class="ad-section">
+            <div class="ad-label">Sponsored</div>
+            <div class="ad-btns">
+                <a href="https://www.coupang.com" target="_blank" class="ad-btn ad-coupang">🛒 쿠팡</a>
+                <a href="https://www.google.com" target="_blank" class="ad-btn ad-google">Google</a>
+            </div>
+        </div>
+    </div>
+    <script src="podo-db.js"></script>
+    
+    <!-- Register Modal -->
+    <div class="modal-overlay" id="registerModal">
+        <div class="modal" style="max-width:450px;background:white;border-radius:20px">
+            <div class="modal-header" style="padding:1.5rem;border-bottom:1px solid #f0f0f0">
+                <h3 style="font-family:'Noto Serif KR',serif;font-size:1.3rem;font-weight:700;color:var(--grape-900)">📚 점주 회원가입</h3>
+                <button onclick="closeModal('registerModal')" style="width:32px;height:32px;border-radius:50%;border:none;background:#f0f0f0;cursor:pointer;font-size:1.1rem">×</button>
+            </div>
+            <div class="modal-body" style="padding:1.5rem">
+                <div class="form-group"><label class="form-label">이름 *</label><input type="text" class="form-input" id="regName" required></div>
+                <div class="form-group"><label class="form-label">연락처 * (로그인 ID)</label><input type="tel" class="form-input" id="regPhone" placeholder="010-0000-0000" required></div>
+                <div class="form-group"><label class="form-label">이메일</label><input type="email" class="form-input" id="regEmail"></div>
+                <div class="form-group"><label class="form-label">비밀번호 *</label><input type="password" class="form-input" id="regPassword" required></div>
+                <div class="form-group"><label class="form-label">비밀번호 확인 *</label><input type="password" class="form-input" id="regPassword2" required></div>
+                <div class="form-group"><label class="form-label">희망 지점</label><select class="form-select" id="regBranch"></select></div>
+                <p style="font-size:0.8rem;color:var(--text-light);margin-top:1rem">* 가입 후 관리자 승인이 필요합니다.<br>* 서가 배정은 지점 방문 후 진행됩니다.</p>
+            </div>
+            <div style="padding:1.5rem;border-top:1px solid #f0f0f0;display:flex;justify-content:flex-end;gap:0.75rem">
+                <button class="btn btn-secondary" onclick="closeModal('registerModal')" style="padding:0.75rem 1.5rem">취소</button>
+                <button class="btn" onclick="registerOwner()" style="padding:0.75rem 1.5rem;background:linear-gradient(135deg,#10b981,#059669);color:white">가입 신청</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded',()=>{
+            const session=PodoSession.get();
+            if(session&&session.type==='owner')location.href='dashboard-owner.html';
+        });
+        function handleLogin(e){
+            e.preventDefault();
+            const phone=document.getElementById('ownerPhone').value;
+            const pw=document.getElementById('ownerPw').value;
+            const owners=PodoDB.get('owners')||[];
+            const owner=owners.find(o=>o.phone===phone&&o.password===pw);
+            if(owner){
+                PodoSession.set(owner,'owner',owner.branchId);
+                showToast('로그인 성공!','success');
+                setTimeout(()=>location.href='dashboard-owner.html',500);
+            }else{
+                document.getElementById('errorMsg').style.display='block';
+                showToast('로그인 실패','error');
+            }
+            return false;
+        }
+        function showToast(msg,type){
+            const t=document.getElementById('toast');
+            t.className='toast show '+type;
+            t.innerHTML=(type==='success'?'✓':'❌')+' '+msg;
+            setTimeout(()=>t.classList.remove('show'),3000);
+        }
+        
+        function openModal(id) { 
+            document.getElementById(id).classList.add('active');
+            if (id === 'registerModal') {
+                const branches = PodoDB.get('branches') || [];
+                document.getElementById('regBranch').innerHTML = '<option value="">선택</option>' + branches.filter(b => b.status === 'active').map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+            }
+        }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        
+        function registerOwner() {
+            const name = document.getElementById('regName').value;
+            const phone = document.getElementById('regPhone').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const password2 = document.getElementById('regPassword2').value;
+            const branchId = document.getElementById('regBranch').value;
+            
+            if (!name || !phone || !password) {
+                showToast('필수 항목을 입력하세요', 'error');
+                return;
+            }
+            if (password !== password2) {
+                showToast('비밀번호가 일치하지 않습니다', 'error');
+                return;
+            }
+            
+            const owners = PodoDB.get('owners') || [];
+            if (owners.find(o => o.phone === phone)) {
+                showToast('이미 등록된 연락처입니다', 'error');
+                return;
+            }
+            
+            const newOwner = {
+                id: PodoDB.generateId('OW'),
+                name: name,
+                phone: phone,
+                email: email,
+                branchId: branchId || 'BR001',
+                shelves: [],
+                bank: '',
+                password: password,
+                status: 'inactive', // 승인 대기
+                createdAt: new Date().toISOString().split('T')[0]
+            };
+            
+            owners.push(newOwner);
+            PodoDB.set('owners', owners);
+            
+            closeModal('registerModal');
+            showToast('가입 신청이 완료되었습니다!\n관리자 승인 후 이용 가능합니다.', 'success');
+            
+            // Clear form
+            ['regName', 'regPhone', 'regEmail', 'regPassword', 'regPassword2'].forEach(id => document.getElementById(id).value = '');
+        }
+    </script>
+</body>
+</html>

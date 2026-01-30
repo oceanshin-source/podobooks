@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>지점 신청 - 포도책방</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.7;
+            color: #333;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        
+        /* 헤더 */
+        header {
+            background: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            text-decoration: none;
+        }
+        
+        .back-link {
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .back-link:hover {
+            color: #333;
+        }
+        
+        /* 히어로 */
+        .hero {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)),
+                        url('https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=1920&q=80') center/cover;
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+        
+        .hero p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        /* 메인 컨텐츠 */
+        .main {
+            max-width: 900px;
+            margin: -40px auto 60px;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        /* 안내 카드 */
+        .info-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .info-card h2 {
+            font-size: 22px;
+            margin-bottom: 25px;
+            color: #333;
+        }
+        
+        .info-section {
+            margin-bottom: 30px;
+        }
+        
+        .info-section h3 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .info-section p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        
+        .info-section ul {
+            color: #666;
+            font-size: 14px;
+            padding-left: 20px;
+        }
+        
+        .info-section li {
+            margin-bottom: 8px;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-left: 4px solid #0284c7;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .highlight-box h4 {
+            color: #0369a1;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+        
+        .highlight-box p {
+            color: #0369a1;
+            font-size: 14px;
+        }
+        
+        /* 신청 폼 */
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .form-card h2 {
+            font-size: 22px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+        
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #333;
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .form-submit {
+            width: 100%;
+            padding: 16px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .form-submit:hover {
+            background: #555;
+        }
+        
+        .form-note {
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .main {
+                grid-template-columns: 1fr;
+                margin-top: -30px;
+            }
+            
+            .hero {
+                padding: 60px 20px;
+            }
+            
+            .hero h1 {
+                font-size: 28px;
+            }
+            
+            .info-card,
+            .form-card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">🍇 포도책방</a>
+            <a href="index.html" class="back-link">← 메인으로</a>
+        </div>
+    </header>
+    
+    <section class="hero">
+        <h1>지점 신청</h1>
+        <p>우리 동네에 포도책방을 열어보세요</p>
+    </section>
+    
+    <main class="main">
+        <div class="info-card">
+            <h2>🏠 지점 개설 안내</h2>
+            
+            <div class="info-section">
+                <h3>📍 포도책방이란?</h3>
+                <p>
+                    포도책방은 시민들이 책장을 임대해 자신만의 책방을 운영하는 공유서점입니다. 
+                    각자의 개성이 담긴 서가가 포도송이처럼 어우러지는 풍성한 책방을 만들어갑니다.
+                </p>
+            </div>
+            
+            <div class="info-section">
+                <h3>✅ 지점 개설 조건</h3>
+                <ul>
+                    <li>30평 이상의 공간 (책장 50개+ 배치 가능)</li>
+                    <li>접근성 좋은 위치 (도보/대중교통)</li>
+                    <li>지역 문화에 대한 관심과 열정</li>
+                    <li>안정적인 운영 가능 여부</li>
+                </ul>
+            </div>
+            
+            <div class="info-section">
+                <h3>🤝 본사 지원 내용</h3>
+                <ul>
+                    <li>브랜드 사용권 및 운영 매뉴얼</li>
+                    <li>통합 관리 시스템 제공</li>
+                    <li>점주 모집 및 홍보 지원</li>
+                    <li>정산/재고 시스템 연동</li>
+                    <li>운영 노하우 및 컨설팅</li>
+                </ul>
+            </div>
+            
+            <div class="highlight-box">
+                <h4>💡 수익 모델</h4>
+                <p>
+                    점주 책장 임대료 + 판매 수수료로 운영됩니다.<br>
+                    목포점 기준 월 평균 200만원 이상의 수익이 발생하고 있습니다.
+                </p>
+            </div>
+        </div>
+        
+        <div class="form-card">
+            <h2>📝 지점 신청서</h2>
+            
+            <form>
+                <div class="form-group">
+                    <label class="form-label">신청자 이름 *</label>
+                    <input type="text" class="form-input" placeholder="홍길동" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">연락처 *</label>
+                    <input type="tel" class="form-input" placeholder="010-1234-5678" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">이메일 *</label>
+                    <input type="email" class="form-input" placeholder="email@example.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">희망 지역 *</label>
+                    <input type="text" class="form-input" placeholder="예: 서울 마포구, 부산 해운대구" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">예상 공간 규모</label>
+                    <select class="form-select">
+                        <option value="">선택해주세요</option>
+                        <option value="30">30평 미만</option>
+                        <option value="30-50">30~50평</option>
+                        <option value="50-100">50~100평</option>
+                        <option value="100">100평 이상</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">공간 보유 여부</label>
+                    <select class="form-select">
+                        <option value="">선택해주세요</option>
+                        <option value="own">이미 보유 중</option>
+                        <option value="contract">계약 예정</option>
+                        <option value="searching">물색 중</option>
+                        <option value="none">아직 없음</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">간단한 자기소개 및 지점 운영 계획 *</label>
+                    <textarea class="form-textarea" placeholder="어떤 공간에서, 어떻게 포도책방을 운영하고 싶은지 자유롭게 작성해주세요" required></textarea>
+                </div>
+                
+                <button type="submit" class="form-submit">지점 신청하기</button>
+            </form>
+            
+            <p class="form-note">* 검토 후 1주일 내 담당자가 연락드립니다.</p>
+        </div>
+    </main>
+    
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('지점 신청이 완료되었습니다! 검토 후 연락드릴게요 🍇');
+        });
+    </script>
+</body>
+</html>

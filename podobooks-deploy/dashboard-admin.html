@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>포도책방 - 본사 대시보드</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{--grape-900:#1a0a2e;--grape-800:#2d1b4e;--grape-700:#4a2c7a;--grape-600:#5e3d8c;--grape-500:#7c4dff;--grape-400:#9d7ae8;--grape-300:#b794f4;--grape-100:#e9d8fd;--grape-50:#f5f0ff;--gold:#d4af37;--text-dark:#2d2d2d;--text-light:#666;--success:#10b981;--warning:#f59e0b;--danger:#ef4444}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Pretendard',sans-serif;background:#f5f7fa;display:flex;min-height:100vh}
+        .sidebar{width:260px;background:linear-gradient(180deg,var(--grape-900),var(--grape-800));padding:1.5rem;position:fixed;top:0;left:0;bottom:0;overflow-y:auto}
+        .sidebar-logo{display:flex;align-items:center;gap:0.6rem;padding-bottom:1.25rem;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:1.25rem}
+        .sidebar-logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--grape-500),var(--gold));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+        .sidebar-logo-text{color:white;font-family:'Noto Serif KR',serif;font-weight:700;font-size:1.1rem}
+        .sidebar-user{padding:0.85rem;background:rgba(255,255,255,0.05);border-radius:10px;margin-bottom:1.25rem}
+        .sidebar-user-name{color:white;font-weight:600;font-size:0.95rem}
+        .sidebar-user-role{color:var(--grape-300);font-size:0.8rem}
+        .sidebar-nav{display:flex;flex-direction:column;gap:0.3rem}
+        .sidebar-section{margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,0.1)}
+        .sidebar-section-title{color:var(--grape-400);font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.6rem;padding-left:0.6rem}
+        .sidebar-item{display:flex;align-items:center;gap:0.6rem;padding:0.75rem 0.85rem;color:rgba(255,255,255,0.7);border-radius:8px;cursor:pointer;font-size:0.9rem;transition:all 0.2s}
+        .sidebar-item:hover{background:rgba(255,255,255,0.1);color:white}
+        .sidebar-item.active{background:linear-gradient(135deg,var(--grape-500),var(--grape-600));color:white}
+        .main{flex:1;margin-left:260px;padding:1.5rem 2rem}
+        .main-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+        .main-title{font-family:'Noto Serif KR',serif;font-size:1.5rem;font-weight:700;color:var(--grape-900)}
+        .main-actions{display:flex;gap:0.75rem;align-items:center}
+        .search-box{display:flex;align-items:center;background:white;border-radius:8px;padding:0.4rem 0.8rem;border:1px solid #e0e0e0}
+        .search-box input{border:none;outline:none;width:180px;padding:0.4rem;font-size:0.9rem}
+        .notif-btn{width:40px;height:40px;background:white;border:1px solid #e0e0e0;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;font-size:1.1rem}
+        .notif-badge{position:absolute;top:-4px;right:-4px;width:18px;height:18px;background:var(--danger);color:white;border-radius:50%;font-size:0.65rem;display:flex;align-items:center;justify-content:center}
+        .quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+        .quick-card{background:white;border-radius:14px;padding:1.25rem;text-align:center;cursor:pointer;border:2px solid transparent;transition:all 0.2s}
+        .quick-card:hover{border-color:var(--grape-300);transform:translateY(-2px);box-shadow:0 8px 20px rgba(124,77,255,0.1)}
+        .quick-icon{width:45px;height:45px;margin:0 auto 0.75rem;background:linear-gradient(135deg,var(--grape-100),var(--grape-300));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem}
+        .quick-title{font-weight:600;color:var(--grape-900);font-size:0.9rem}
+        .quick-desc{font-size:0.75rem;color:var(--text-light)}
+        .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+        .stat-card{background:white;border-radius:14px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+        .stat-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem}
+        .stat-card-title{font-size:0.8rem;color:var(--text-light);font-weight:500}
+        .stat-card-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+        .stat-card-value{font-size:1.75rem;font-weight:700;color:var(--grape-900)}
+        .stat-card-change{font-size:0.8rem;margin-top:0.25rem}
+        .stat-card-change.up{color:var(--success)}
+        .card{background:white;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow:hidden;margin-bottom:1.5rem}
+        .card-header{padding:1.25rem;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center}
+        .card-title{font-weight:700;color:var(--grape-900)}
+        .card-body{padding:1.25rem}
+        .data-table{width:100%;border-collapse:collapse}
+        .data-table th,.data-table td{padding:0.85rem 1rem;text-align:left;border-bottom:1px solid #f0f0f0;font-size:0.9rem}
+        .data-table th{background:#fafafa;font-weight:600;color:var(--text-light);font-size:0.8rem}
+        .data-table tbody tr:hover{background:var(--grape-50)}
+        .badge{padding:0.25rem 0.6rem;border-radius:50px;font-size:0.75rem;font-weight:600}
+        .badge-success{background:#d1fae5;color:#065f46}
+        .badge-warning{background:#fef3c7;color:#92400e}
+        .grid-2{display:grid;grid-template-columns:2fr 1fr;gap:1.5rem}
+        .branch-bar{margin-bottom:1rem}
+        .branch-bar-header{display:flex;justify-content:space-between;margin-bottom:0.4rem}
+        .branch-bar-name{font-weight:600;font-size:0.9rem}
+        .branch-bar-val{color:var(--grape-600);font-size:0.9rem}
+        .branch-bar-track{background:var(--grape-100);border-radius:6px;height:8px;overflow:hidden}
+        .branch-bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--grape-500),var(--grape-600))}
+        .btn{padding:0.5rem 1rem;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;border:none}
+        .btn-primary{background:linear-gradient(135deg,var(--grape-600),var(--grape-700));color:white}
+        .btn-secondary{background:white;color:var(--grape-700);border:1px solid var(--grape-300)}
+        .btn-success{background:linear-gradient(135deg,var(--success),#059669);color:white}
+        .btn-gold{background:linear-gradient(135deg,var(--gold),#f4e4a6);color:var(--grape-900)}
+        .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center}
+        .modal-overlay.active{display:flex}
+        .modal{background:white;border-radius:16px;width:90%;max-width:550px;max-height:90vh;overflow-y:auto;animation:modalIn 0.25s ease-out}
+        @keyframes modalIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
+        .modal-header{padding:1.25rem;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center}
+        .modal-title{font-family:'Noto Serif KR',serif;font-size:1.2rem;font-weight:700;color:var(--grape-900)}
+        .modal-close{width:32px;height:32px;border-radius:50%;border:none;background:#f0f0f0;cursor:pointer;font-size:1.1rem}
+        .modal-body{padding:1.25rem}
+        .modal-footer{padding:1.25rem;border-top:1px solid #f0f0f0;display:flex;justify-content:flex-end;gap:0.6rem}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+        .form-group{margin-bottom:1rem}
+        .form-label{display:block;font-weight:600;color:var(--grape-800);margin-bottom:0.4rem;font-size:0.85rem}
+        .form-input,.form-select{width:100%;padding:0.75rem 1rem;border:2px solid var(--grape-100);border-radius:10px;font-size:0.95rem;background:var(--grape-50)}
+        .form-input:focus,.form-select:focus{outline:none;border-color:var(--grape-500);background:white}
+        .scanner{background:#1a1a2e;border-radius:12px;padding:1.5rem;text-align:center;color:white;margin-bottom:1.25rem}
+        .scanner-view{width:100%;height:120px;background:#16213e;border-radius:8px;margin-bottom:0.75rem;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+        .scanner-line{position:absolute;width:80%;height:2px;background:var(--success);box-shadow:0 0 8px var(--success);animation:scanAnim 2s ease-in-out infinite}
+        @keyframes scanAnim{0%,100%{top:15%}50%{top:85%}}
+        .scanner-input{width:100%;padding:0.85rem;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);border-radius:8px;color:white;font-size:1.1rem;text-align:center}
+        .scanner-input::placeholder{color:rgba(255,255,255,0.4)}
+        .toast{position:fixed;top:1.5rem;right:1.5rem;padding:1rem 1.5rem;background:white;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,0.15);display:none;z-index:300;align-items:center;gap:0.5rem}
+        .toast.show{display:flex}
+        .toast.success{border-left:4px solid var(--success)}
+        .toast.error{border-left:4px solid var(--danger)}
+        @media(max-width:1100px){.stat-grid,.quick-grid{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}}
+        @media(max-width:900px){.sidebar{width:70px;padding:1rem 0.5rem}.sidebar-logo-text,.sidebar-section-title,.sidebar-item span:last-child,.sidebar-user-name,.sidebar-user-role{display:none}.sidebar-logo,.sidebar-item{justify-content:center}.main{margin-left:70px}}
+    </style>
+</head>
+<body>
+    <div class="toast" id="toast"></div>
+    <aside class="sidebar">
+        <div class="sidebar-logo"><div class="sidebar-logo-icon">🍇</div><span class="sidebar-logo-text">포도책방</span></div>
+        <div class="sidebar-user"><div class="sidebar-user-name" id="userName">관리자</div><div class="sidebar-user-role">본사 / 전체 권한</div></div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-item active" data-section="overview"><span>📊</span><span>대시보드</span></div>
+            <div class="sidebar-item" data-section="branches"><span>🏪</span><span>지점 관리</span></div>
+            <div class="sidebar-item" data-section="owners"><span>👥</span><span>점주 관리</span></div>
+            <div class="sidebar-item" data-section="books"><span>📚</span><span>도서 관리</span></div>
+            <div class="sidebar-item" data-section="goods"><span>🎁</span><span>굿즈 관리</span></div>
+            <div class="sidebar-item" data-section="sales"><span>💰</span><span>매출 관리</span></div>
+            <div class="sidebar-item" data-section="settlements"><span>🧾</span><span>정산 관리</span></div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">시스템</div>
+                <div class="sidebar-item" data-section="shelves"><span>📦</span><span>서가 관리</span></div>
+                <div class="sidebar-item" data-section="settings"><span>⚙️</span><span>설정</span></div>
+            </div>
+        </nav>
+        <div style="margin-top:auto;padding-top:1rem"><div class="sidebar-item" onclick="doLogout()"><span>🚪</span><span>로그아웃</span></div></div>
+    </aside>
+    <main class="main" id="mainContent"></main>
+
+    <!-- Notification Modal -->
+    <div class="modal-overlay" id="notifModal">
+        <div class="modal" style="max-width:450px">
+            <div class="modal-header"><h3 class="modal-title">🔔 알림</h3><button class="modal-close" onclick="closeModal('notifModal')">×</button></div>
+            <div class="modal-body" id="notifList" style="max-height:400px;overflow-y:auto"></div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="markAllNotifRead()">모두 읽음</button></div>
+        </div>
+    </div>
+
+    <!-- Add Book Modal -->
+    <div class="modal-overlay" id="addBookModal">
+        <div class="modal">
+            <div class="modal-header"><h3 class="modal-title">📖 도서 등록</h3><button class="modal-close" onclick="closeModal('addBookModal')">×</button></div>
+            <div class="modal-body">
+                <div class="scanner">
+                    <div class="scanner-view">
+                        <video id="scannerVideo" style="width:100%;height:100%;object-fit:cover;display:none"></video>
+                        <canvas id="scannerCanvas" style="display:none"></canvas>
+                        <div class="scanner-line"></div>
+                        <span id="scannerPlaceholder" style="opacity:0.5">ISBN 바코드 스캔</span>
+                    </div>
+                    <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem">
+                        <button onclick="startScanner('bookIsbn')" style="flex:1;padding:0.5rem;background:var(--success);color:white;border:none;border-radius:6px;cursor:pointer">📷 카메라 스캔</button>
+                        <button onclick="stopBarcodeScanner()" style="padding:0.5rem;background:#666;color:white;border:none;border-radius:6px;cursor:pointer">중지</button>
+                    </div>
+                    <input type="text" class="scanner-input" id="bookIsbn" placeholder="ISBN 입력 또는 스캔">
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">도서명 *</label><input type="text" class="form-input" id="bookTitle"></div>
+                    <div class="form-group"><label class="form-label">저자 *</label><input type="text" class="form-input" id="bookAuthor"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">출판사</label><input type="text" class="form-input" id="bookPublisher"></div>
+                    <div class="form-group"><label class="form-label">판매가 *</label><input type="number" class="form-input" id="bookPrice"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">상태 (정산 배분율)</label><select class="form-select" id="bookCondition"><option value="order_new">주문새책 (책방 0% / 점주 100%)</option><option value="owner_new">점주새책 (책방 15% / 점주 85%)</option><option value="used" selected>헌책 (책방 50% / 점주 50%)</option></select></div>
+                    <div class="form-group"><label class="form-label">서가/점주 *</label><select class="form-select" id="bookOwner"></select></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('addBookModal')">취소</button><button class="btn btn-success" onclick="saveBook(true)">등록 + QR출력</button><button class="btn btn-primary" onclick="saveBook(false)">등록만</button></div>
+        </div>
+    </div>
+
+    <!-- Sale Modal -->
+    <div class="modal-overlay" id="saleModal">
+        <div class="modal">
+            <div class="modal-header"><h3 class="modal-title">💳 판매 처리</h3><button class="modal-close" onclick="closeModal('saleModal');clearCart()">×</button></div>
+            <div class="modal-body">
+                <div class="scanner">
+                    <div class="scanner-view">
+                        <video id="saleVideo" style="width:100%;height:100%;object-fit:cover;display:none"></video>
+                        <div class="scanner-line"></div>
+                        <span style="opacity:0.5">도서 바코드 스캔</span>
+                    </div>
+                    <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem">
+                        <button onclick="startScanner('saleIsbn', addToCart)" style="flex:1;padding:0.5rem;background:var(--success);color:white;border:none;border-radius:6px;cursor:pointer">📷 카메라 스캔</button>
+                        <button onclick="stopBarcodeScanner()" style="padding:0.5rem;background:#666;color:white;border:none;border-radius:6px;cursor:pointer">중지</button>
+                    </div>
+                    <input type="text" class="scanner-input" id="saleIsbn" placeholder="ISBN 또는 도서ID" onkeypress="if(event.key==='Enter')addToCart()">
+                </div>
+                <div id="cartItems" style="margin-bottom:1rem;max-height:150px;overflow-y:auto"></div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">결제수단</label><select class="form-select" id="payMethod"><option value="card">카드</option><option value="cash">현금</option></select></div>
+                    <div class="form-group"><label class="form-label">총 금액</label><input type="text" class="form-input" id="cartTotal" value="₩0" readonly style="font-weight:700;font-size:1.2rem;text-align:right"></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('saleModal');clearCart()">취소</button><button class="btn btn-success" onclick="completeSale()">결제 완료</button></div>
+        </div>
+    </div>
+
+    <!-- Add Owner Modal -->
+    <div class="modal-overlay" id="addOwnerModal">
+        <div class="modal">
+            <div class="modal-header"><h3 class="modal-title">👤 점주 등록</h3><button class="modal-close" onclick="closeModal('addOwnerModal')">×</button></div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">이름 *</label><input type="text" class="form-input" id="ownerName"></div>
+                    <div class="form-group"><label class="form-label">연락처 *</label><input type="tel" class="form-input" id="ownerPhone" placeholder="010-0000-0000"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">이메일</label><input type="email" class="form-input" id="ownerEmail"></div>
+                    <div class="form-group"><label class="form-label">지점 *</label><select class="form-select" id="ownerBranch"></select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">서가 배정</label><input type="text" class="form-input" id="ownerShelves" placeholder="A-01, A-02"></div>
+                    <div class="form-group"><label class="form-label">비밀번호 *</label><input type="password" class="form-input" id="ownerPassword" value="1234"></div>
+                </div>
+                <div class="form-group"><label class="form-label">정산계좌 *</label><input type="text" class="form-input" id="ownerBank" placeholder="은행명 계좌번호"></div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('addOwnerModal')">취소</button><button class="btn btn-primary" onclick="saveOwner()">등록</button></div>
+        </div>
+    </div>
+
+    <!-- Add Branch Modal -->
+    <div class="modal-overlay" id="addBranchModal">
+        <div class="modal">
+            <div class="modal-header"><h3 class="modal-title">🏪 지점 추가</h3><button class="modal-close" onclick="closeModal('addBranchModal')">×</button></div>
+            <div class="modal-body">
+                <div class="form-group"><label class="form-label">지점명 *</label><input type="text" class="form-input" id="branchNameInput" placeholder="예: 서울점"></div>
+                <div class="form-group"><label class="form-label">주소 *</label><input type="text" class="form-input" id="branchAddress" placeholder="예: 서울시 강남구..."></div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">서가 수</label><input type="number" class="form-input" id="branchShelfCount" value="100"></div>
+                    <div class="form-group"><label class="form-label">상태</label><select class="form-select" id="branchStatus"><option value="active">운영중</option><option value="pending">준비중</option></select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">아이콘</label><input type="text" class="form-input" id="branchIcon" value="🏪" style="font-size:1.5rem"></div>
+                    <div class="form-group"><label class="form-label">테마색상</label><input type="color" class="form-input" id="branchColor" value="#7c4dff" style="height:46px;padding:5px"></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('addBranchModal')">취소</button><button class="btn btn-primary" onclick="saveBranch()">등록</button></div>
+        </div>
+    </div>
+
+    <!-- Owner Detail Modal -->
+    <div class="modal-overlay" id="ownerDetailModal">
+        <div class="modal">
+            <div class="modal-header"><h3 class="modal-title">👤 점주 상세</h3><button class="modal-close" onclick="closeModal('ownerDetailModal')">×</button></div>
+            <div class="modal-body" id="ownerDetailBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" style="margin-right:auto" onclick="deleteOwner()">삭제</button>
+                <button class="btn btn-secondary" onclick="closeModal('ownerDetailModal')">닫기</button>
+                <button class="btn btn-primary" onclick="updateOwner()">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Goods Modal -->
+    <div class="modal-overlay" id="addGoodsModal">
+        <div class="modal">
+            <div class="modal-header"><h3 class="modal-title">🎁 굿즈 등록</h3><button class="modal-close" onclick="closeModal('addGoodsModal')">×</button></div>
+            <div class="modal-body">
+                <div class="form-group"><label class="form-label">상품명 *</label><input type="text" class="form-input" id="goodsName"></div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">판매가 *</label><input type="number" class="form-input" id="goodsPrice"></div>
+                    <div class="form-group"><label class="form-label">수량 *</label><input type="number" class="form-input" id="goodsQty" value="1"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">상태 (정산 배분율)</label><select class="form-select" id="goodsStatus">
+                        <option value="podo">포도 (책방 100% / 점주 0%)</option>
+                        <option value="collab">협력 (책방 30% / 점주 70%)</option>
+                        <option value="handmade" selected>자작 (책방 20% / 점주 80%)</option>
+                        <option value="consign">위탁 (책방 20% / 점주 80%)</option>
+                    </select></div>
+                    <div class="form-group"><label class="form-label">지점 *</label><select class="form-select" id="goodsBranch"></select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">점주 (포도 제외)</label><select class="form-select" id="goodsOwner"><option value="">포도책방 자체</option></select></div>
+                    <div class="form-group"><label class="form-label">서가</label><input type="text" class="form-input" id="goodsShelf" placeholder="예: S01"></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('addGoodsModal')">취소</button><button class="btn btn-success" onclick="saveGoods(true)">등록 + QR출력</button><button class="btn btn-primary" onclick="saveGoods(false)">등록만</button></div>
+        </div>
+    </div>
+
+    <!-- Settlement Modal -->
+    <div class="modal-overlay" id="settlementModal">
+        <div class="modal">
+            <div class="modal-header"><h3 class="modal-title">🧾 정산 실행</h3><button class="modal-close" onclick="closeModal('settlementModal')">×</button></div>
+            <div class="modal-body">
+                <div style="background:var(--grape-50);border-radius:12px;padding:1.5rem;text-align:center;margin-bottom:1rem">
+                    <h4 style="color:var(--grape-800);margin-bottom:0.75rem" id="settlePeriod">2025년 1월 정산</h4>
+                    <div style="font-size:2rem;font-weight:700;color:var(--grape-700)" id="settleTotal">₩0</div>
+                    <p style="color:var(--text-light);margin-top:0.5rem" id="settleCount">0명 정산 대상</p>
+                </div>
+                <div style="background:#fef3c7;border-radius:8px;padding:0.85rem;display:flex;gap:0.6rem;align-items:center">
+                    <span>⚠️</span><span style="font-size:0.85rem;color:#92400e">정산 실행 전 판매 내역을 최종 확인해주세요.</span>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('settlementModal')">취소</button><button class="btn btn-gold" onclick="executeSettlement()">정산 실행</button></div>
+        </div>
+    </div>
+
+    <script src="podo-db.js"></script>
+    <script>
+        let cart = [];
+        let currentSection = 'overview';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const session = PodoSession.get();
+            if (!session || session.type !== 'admin') { location.href = 'login-admin.html'; return; }
+            document.getElementById('userName').textContent = session.user.name || '관리자';
+            renderSection('overview');
+            setupNav();
+        });
+
+        function setupNav() {
+            document.querySelectorAll('.sidebar-item[data-section]').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    renderSection(this.dataset.section);
+                });
+            });
+        }
+
+        function renderSection(section) {
+            currentSection = section;
+            const main = document.getElementById('mainContent');
+            const stats = calcStats();
+            const sales = PodoDB.get('sales') || [];
+            const books = PodoDB.get('books') || [];
+            const owners = PodoDB.get('owners') || [];
+            const branches = PodoDB.get('branches') || [];
+
+            if (section === 'overview') {
+                main.innerHTML = `
+                    <div class="main-header"><h1 class="main-title">대시보드</h1><div class="main-actions"><div class="search-box"><span>🔍</span><input type="text" placeholder="검색..."></div><button class="notif-btn" onclick="openNotifModal()">🔔<span class="notif-badge" id="notifCount">0</span></button></div></div>
+                    <div class="quick-grid">
+                        <div class="quick-card" onclick="openAddBookModal()"><div class="quick-icon">📖</div><div class="quick-title">도서 등록</div><div class="quick-desc">바코드 스캔</div></div>
+                        <div class="quick-card" onclick="openModal('saleModal')"><div class="quick-icon">💳</div><div class="quick-title">판매 처리</div><div class="quick-desc">결제 입력</div></div>
+                        <div class="quick-card" onclick="openAddOwnerModal()"><div class="quick-icon">👤</div><div class="quick-title">점주 등록</div><div class="quick-desc">신규 가입</div></div>
+                        <div class="quick-card" onclick="openSettlementModal()"><div class="quick-icon">🧾</div><div class="quick-title">정산 실행</div><div class="quick-desc">월간 정산</div></div>
+                    </div>
+                    <div class="stat-grid">
+                        <div class="stat-card"><div class="stat-card-header"><span class="stat-card-title">총 매출</span><div class="stat-card-icon" style="background:#d1fae5;color:#065f46">💰</div></div><div class="stat-card-value">${formatMoney(stats.totalSales)}</div><div class="stat-card-change up">↑ 12.5%</div></div>
+                        <div class="stat-card"><div class="stat-card-header"><span class="stat-card-title">판매 도서</span><div class="stat-card-icon" style="background:#dbeafe;color:#1e40af">📚</div></div><div class="stat-card-value">${stats.salesCount}권</div><div class="stat-card-change up">↑ 8.3%</div></div>
+                        <div class="stat-card"><div class="stat-card-header"><span class="stat-card-title">활성 점주</span><div class="stat-card-icon" style="background:#fef3c7;color:#92400e">👥</div></div><div class="stat-card-value">${stats.ownerCount}명</div><div class="stat-card-change up">↑ 5명</div></div>
+                        <div class="stat-card"><div class="stat-card-header"><span class="stat-card-title">정산 예정</span><div class="stat-card-icon" style="background:#e9d8fd;color:#5b21b6">🧾</div></div><div class="stat-card-value">${formatMoney(stats.settlementAmount)}</div><div class="stat-card-change">2월 10일</div></div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="card"><div class="card-header"><span class="card-title">최근 판매</span><button class="btn btn-secondary" onclick="renderSection('sales')">전체보기</button></div>
+                            <table class="data-table"><thead><tr><th>시간</th><th>도서명</th><th>점주</th><th>지점</th><th>금액</th></tr></thead>
+                            <tbody>${sales.slice(-5).reverse().map(s => {
+                                const branch = branches.find(b=>b.id===s.branchId);
+                                return `<tr><td>${s.date.split(' ')[1]||''}</td><td>${s.bookTitle||'-'}</td><td>${s.ownerName||'-'}</td><td>${branch?.name||'-'}</td><td>${formatMoney(s.price)}</td></tr>`;
+                            }).join('')}</tbody></table>
+                        </div>
+                        <div class="card"><div class="card-header"><span class="card-title">지점별 현황</span></div><div class="card-body">
+                            ${branches.filter(b=>b.status==='active').map(b => {
+                                const branchSales = sales.filter(s=>s.branchId===b.id).reduce((sum,s)=>sum+s.price,0);
+                                const pct = stats.totalSales > 0 ? Math.round(branchSales/stats.totalSales*100) : 0;
+                                return `<div class="branch-bar"><div class="branch-bar-header"><span class="branch-bar-name">${b.name}</span><span class="branch-bar-val">${formatMoney(branchSales)}</span></div><div class="branch-bar-track"><div class="branch-bar-fill" style="width:${pct}%"></div></div></div>`;
+                            }).join('')}
+                        </div></div>
+                    </div>
+                    <div class="card"><div class="card-header"><span class="card-title">📈 주간 매출 추이</span></div><div class="card-body"><canvas id="salesChart" height="80"></canvas></div></div>`;
+                // 차트 그리기
+                setTimeout(() => drawSalesChart(), 100);
+                // 알림 카운트 업데이트
+                updateNotifCount();
+            } else if (section === 'branches') {
+                main.innerHTML = `
+                    <div class="main-header"><h1 class="main-title">지점 관리</h1><span style="font-size:0.85rem;color:var(--text-light)">※ 지점 추가는 별도 문의</span></div>
+                    <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">${branches.map(b => `
+                        <div class="card"><div class="card-body">
+                            <div style="display:flex;justify-content:space-between;align-items:start">
+                                <div><h3 style="font-size:1.2rem;font-weight:700;color:var(--grape-900)">${b.name}</h3><p style="color:var(--text-light);font-size:0.85rem;margin:0.5rem 0">${b.address}</p><span class="badge ${b.status==='active'?'badge-success':'badge-warning'}">${b.status==='active'?'운영중':'준비중'}</span></div>
+                                <div style="width:50px;height:50px;border-radius:12px;background:linear-gradient(135deg,${b.color},${b.color}cc);display:flex;align-items:center;justify-content:center;font-size:1.5rem">${b.icon}</div>
+                            </div>
+                            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.5rem;padding-top:1rem;border-top:1px solid #f0f0f0">
+                                <div><div style="font-weight:700;color:var(--grape-700)">${b.shelfCount}</div><div style="font-size:0.75rem;color:var(--text-light)">서가</div></div>
+                                <div><div style="font-weight:700;color:var(--grape-700)">${owners.filter(o=>o.branchId===b.id&&o.status==='active').length}</div><div style="font-size:0.75rem;color:var(--text-light)">점주</div></div>
+                                <div><div style="font-weight:700;color:var(--grape-700)">${books.filter(bk=>bk.branchId===b.id).length}</div><div style="font-size:0.75rem;color:var(--text-light)">도서</div></div>
+                            </div>
+                        </div></div>
+                    `).join('')}</div>`;
+            } else if (section === 'owners') {
+                main.innerHTML = `
+                    <div class="main-header"><h1 class="main-title">점주 관리</h1><button class="btn btn-primary" onclick="openAddOwnerModal()">+ 점주 등록</button></div>
+                    <div class="card"><table class="data-table">
+                        <thead><tr><th>이름</th><th>연락처</th><th>지점</th><th>서가</th><th>도서수</th><th>상태</th><th>관리</th></tr></thead>
+                        <tbody>${owners.map(o => {
+                            const branch = branches.find(b=>b.id===o.branchId);
+                            const bookCount = books.filter(b=>b.ownerId===o.id).length;
+                            return `<tr><td><strong>${o.name}</strong></td><td>${o.phone}</td><td>${branch?.name||'-'}</td><td>${o.shelves?.join(', ')||'-'}</td><td>${bookCount}권</td><td><span class="badge ${o.status==='active'?'badge-success':'badge-warning'}">${o.status==='active'?'활성':'휴면'}</span></td><td><button class="btn btn-secondary" onclick="openOwnerDetail('${o.id}')">상세</button></td></tr>`;
+                        }).join('')}</tbody>
+                    </table></div>`;
+            } else if (section === 'books') {
+                main.innerHTML = `
+                    <div class="main-header"><h1 class="main-title">도서 관리</h1><div style="display:flex;gap:0.5rem"><button class="btn btn-secondary" onclick="exportBooks()">📥 엑셀 다운로드</button><button class="btn btn-primary" onclick="openAddBookModal()">+ 도서 등록</button></div></div>
+                    <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
+                        <div class="stat-card"><div class="stat-card-title">전체 도서</div><div class="stat-card-value">${books.length}</div></div>
+                        <div class="stat-card"><div class="stat-card-title">판매 가능</div><div class="stat-card-value" style="color:var(--success)">${books.filter(b=>b.status==='available').length}</div></div>
+                        <div class="stat-card"><div class="stat-card-title">판매됨</div><div class="stat-card-value" style="color:var(--warning)">${books.filter(b=>b.status==='sold').length}</div></div>
+                        <div class="stat-card"><div class="stat-card-title">이번달 등록</div><div class="stat-card-value" style="color:var(--grape-600)">+${books.filter(b=>b.createdAt?.startsWith(getTodayStr().slice(0,7))).length}</div></div>
+                    </div>
+                    <div class="card"><table class="data-table">
+                        <thead><tr><th>ISBN</th><th>도서명</th><th>저자</th><th>점주</th><th>서가</th><th>가격</th><th>상태</th><th>QR</th></tr></thead>
+                        <tbody>${books.map(b => {
+                            const owner = owners.find(o=>o.id===b.ownerId);
+                            const statusName = BOOK_STATUS[b.status]?.name || b.status;
+                            return `<tr><td style="font-family:monospace;font-size:0.8rem">${b.isbn||'-'}</td><td><strong>${b.title}</strong></td><td>${b.author}</td><td>${owner?.ownerNumber||'-'}</td><td>${b.shelf||'-'}</td><td>${formatMoney(b.price)}</td><td><span class="badge ${b.saleStatus==='available'?'badge-success':'badge-warning'}">${statusName}</span></td><td><button class="btn btn-secondary" onclick="printQRLabel({id:'${b.id}',title:'${b.title}',ownerNumber:'${b.ownerNumber||''}',price:${b.price}})">🏷️</button></td></tr>`;
+                        }).join('')}</tbody>
+                    </table></div>`;
+            } else if (section === 'goods') {
+                const goods = PodoDB.get('goods') || [];
+                main.innerHTML = `
+                    <div class="main-header"><h1 class="main-title">🎁 굿즈 관리</h1><div style="display:flex;gap:0.5rem"><button class="btn btn-primary" onclick="openModal('addGoodsModal')">+ 굿즈 등록</button></div></div>
+                    <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
+                        <div class="stat-card"><div class="stat-card-title">포도(자체)</div><div class="stat-card-value">${goods.filter(g=>g.status==='podo').length}개</div><div style="font-size:0.75rem;color:var(--text-light)">책방 100%</div></div>
+                        <div class="stat-card"><div class="stat-card-title">협력</div><div class="stat-card-value">${goods.filter(g=>g.status==='collab').length}개</div><div style="font-size:0.75rem;color:var(--text-light)">책방 30% / 점주 70%</div></div>
+                        <div class="stat-card"><div class="stat-card-title">자작</div><div class="stat-card-value">${goods.filter(g=>g.status==='handmade').length}개</div><div style="font-size:0.75rem;color:var(--text-light)">책방 20% / 점주 80%</div></div>
+                        <div class="stat-card"><div class="stat-card-title">위탁</div><div class="stat-card-value">${goods.filter(g=>g.status==='consign').length}개</div><div style="font-size:0.75rem;color:var(--text-light)">책방 20% / 점주 80%</div></div>
+                    </div>
+                    <div class="card"><table class="data-table">
+                        <thead><tr><th>상품명</th><th>상태</th><th>가격</th><th>수량</th><th>점주</th><th>지점</th><th>QR</th></tr></thead>
+                        <tbody>${goods.map(g => {
+                            const owner = owners.find(o=>o.id===g.ownerId);
+                            const branch = branches.find(br=>br.id===g.branchId);
+                            const statusName = GOODS_STATUS[g.status]?.name || g.status;
+                            return `<tr><td><strong>${g.name}</strong></td><td><span class="badge badge-success">${statusName}</span></td><td>${formatMoney(g.price)}</td><td>${g.qty}개</td><td>${g.ownerNumber||'포도책방'}</td><td>${branch?.name||'-'}</td><td><button class="btn btn-secondary" onclick="printQRLabel({id:'${g.id}',title:'${g.name}',ownerNumber:'${g.ownerNumber||''}',price:${g.price}})">🏷️</button></td></tr>`;
+                        }).join('')}</tbody>
+                    </table></div>`;
+            } else if (section === 'sales') {
+                const allSales = sales.slice().reverse();
+                main.innerHTML = `
+                    <div class="main-header"><h1 class="main-title">매출 관리</h1><div style="display:flex;gap:0.5rem"><button class="btn btn-secondary" onclick="exportSales()">📥 엑셀 다운로드</button><button class="btn btn-primary" onclick="openModal('saleModal')">+ 판매 입력</button></div></div>
+                    <div class="card" style="padding:1rem;margin-bottom:1rem">
+                        <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+                            <div><label style="font-size:0.85rem;color:var(--text-light)">시작일</label><input type="date" id="adminSalesStart" class="form-input" style="width:auto;padding:0.5rem" onchange="filterAdminSales()"></div>
+                            <div><label style="font-size:0.85rem;color:var(--text-light)">종료일</label><input type="date" id="adminSalesEnd" class="form-input" style="width:auto;padding:0.5rem" onchange="filterAdminSales()"></div>
+                            <select id="adminSalesBranch" class="form-select" style="width:auto;padding:0.5rem" onchange="filterAdminSales()">
+                                <option value="">전체 지점</option>
+                                ${branches.map(b=>`<option value="${b.id}">${b.name}</option>`).join('')}
+                            </select>
+                            <button class="btn btn-secondary" style="padding:0.5rem 1rem" onclick="resetAdminSalesFilter()">초기화</button>
+                            <div style="margin-left:auto;font-weight:600" id="adminSalesSummary">총 ${allSales.length}건 / ${formatMoney(allSales.reduce((s,x)=>s+x.price,0))}</div>
+                        </div>
+                    </div>
+                    <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
+                        <div class="stat-card"><div class="stat-card-header"><span class="stat-card-title">총 매출</span></div><div class="stat-card-value">${formatMoney(stats.totalSales)}</div></div>
+                        <div class="stat-card"><div class="stat-card-header"><span class="stat-card-title">카드</span></div><div class="stat-card-value">${formatMoney(sales.filter(s=>s.method==='card').reduce((sum,s)=>sum+s.price,0))}</div></div>
+                        <div class="stat-card"><div class="stat-card-header"><span class="stat-card-title">현금</span></div><div class="stat-card-value">${formatMoney(sales.filter(s=>s.method==='cash').reduce((sum,s)=>sum+s.price,0))}</div></div>
+                        <div class="stat-card"><div class="stat-card-header"><span class="stat-card-title">거래 건수</span></div><div class="stat-card-value">${sales.length}건</div></div>
+                    </div>
+                    <div class="card"><div class="card-header"><span class="card-title">판매 내역</span></div><table class="data-table" id="adminSalesTable">
+                        <thead><tr><th>판매ID</th><th>일시</th><th>상품명</th><th>상태</th><th>점주</th><th>금액</th><th>책방</th><th>점주수익</th><th>결제</th><th>처리</th></tr></thead>
+                        <tbody>${allSales.map(s => {
+                            const branch = branches.find(b=>b.id===s.branchId);
+                            const isRefunded = s.saleStatus === 'refunded';
+                            return `<tr data-date="${(s.createdAt||s.date||'').split(' ')[0]}" data-branch="${s.branchId||''}" style="${isRefunded?'opacity:0.5;text-decoration:line-through':''}"><td style="font-family:monospace;font-size:0.75rem">${s.id}</td><td style="font-size:0.8rem">${s.createdAt||s.date||''}</td><td><strong>${s.itemTitle||s.bookTitle||'-'}</strong></td><td style="font-size:0.75rem">${s.status||'-'}</td><td>${s.ownerNumber||s.ownerName||'-'}</td><td>${formatMoney(s.price)}</td><td style="color:var(--grape-600)">${formatMoney(s.shopAmount||0)}</td><td style="color:var(--success);font-weight:600">${formatMoney(s.ownerAmount||0)}</td><td>${s.method==='card'?'카드':s.method==='cash'?'현금':'계좌'}</td><td>${isRefunded?'<span class="badge badge-warning">반품</span>':`<button class="btn btn-secondary" style="font-size:0.7rem;padding:0.25rem 0.5rem" onclick="refundSale('${s.id}')">반품</button>`}</td></tr>`;
+                        }).join('')}</tbody>
+                    </table></div>`;
+            } else if (section === 'settlements') {
+                const settlements = PodoDB.get('settlements') || [];
+                main.innerHTML = `
+                    <div class="main-header"><h1 class="main-title">정산 관리</h1><div style="display:flex;gap:0.5rem"><button class="btn btn-secondary" onclick="exportSettlements()">📥 엑셀 다운로드</button><button class="btn btn-gold" onclick="openSettlementModal()">정산 실행</button></div></div>
+                    <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
+                        <div class="stat-card"><div class="stat-card-title">정산 예정액</div><div class="stat-card-value">${formatMoney(stats.settlementAmount)}</div><div class="stat-card-change">2월 10일</div></div>
+                        <div class="stat-card"><div class="stat-card-title">수수료 수익</div><div class="stat-card-value">${formatMoney(stats.commission)}</div><div class="stat-card-change">10%</div></div>
+                        <div class="stat-card"><div class="stat-card-title">정산 대상</div><div class="stat-card-value">${stats.ownerCount}명</div></div>
+                        <div class="stat-card"><div class="stat-card-title">완료 정산</div><div class="stat-card-value">${settlements.filter(s=>s.status==='completed').length}건</div></div>
+                    </div>
+                    <div class="card"><div class="card-header"><span class="card-title">정산 내역</span></div><table class="data-table">
+                        <thead><tr><th>정산ID</th><th>기간</th><th>점주</th><th>판매액</th><th>수수료</th><th>임대료</th><th>정산액</th><th>상태</th></tr></thead>
+                        <tbody>${settlements.map(s => `<tr><td style="font-family:monospace;font-size:0.8rem">${s.id}</td><td>${s.period}</td><td>${s.ownerName}</td><td>${formatMoney(s.sales)}</td><td>-${formatMoney(s.commission)}</td><td>-${formatMoney(s.rent)}</td><td style="font-weight:700;color:var(--grape-700)">${formatMoney(s.amount)}</td><td><span class="badge badge-success">완료</span></td></tr>`).join('')}</tbody>
+                    </table></div>`;
+            } else if (section === 'shelves') {
+                const shelves = PodoDB.get('shelves') || [];
+                const branchShelves = {};
+                branches.forEach(b => {
+                    branchShelves[b.id] = { total: 0, used: 0, name: b.name };
+                });
+                shelves.forEach(s => {
+                    if (branchShelves[s.branchId]) {
+                        branchShelves[s.branchId].total++;
+                        if (s.ownerId) branchShelves[s.branchId].used++;
+                    }
+                });
+                main.innerHTML = `
+                    <div class="main-header"><h1 class="main-title">서가 관리</h1></div>
+                    <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.5rem">
+                        ${Object.entries(branchShelves).map(([id, data]) => `
+                            <div class="stat-card">
+                                <div class="stat-card-header"><span class="stat-card-title">${data.name}</span></div>
+                                <div class="stat-card-value">${data.used}/${data.total}</div>
+                                <div class="stat-card-change">사용률 ${data.total > 0 ? Math.round(data.used/data.total*100) : 0}%</div>
+                                <div style="margin-top:0.75rem;background:var(--grape-100);border-radius:6px;height:8px;overflow:hidden">
+                                    <div style="height:100%;background:linear-gradient(90deg,var(--grape-500),var(--grape-600));width:${data.total > 0 ? Math.round(data.used/data.total*100) : 0}%"></div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="card"><div class="card-header"><span class="card-title">서가 현황</span></div>
+                        <table class="data-table">
+                            <thead><tr><th>서가코드</th><th>지점</th><th>타입</th><th>월임대료</th><th>점주</th><th>상태</th></tr></thead>
+                            <tbody>${shelves.slice(0, 50).map(s => {
+                                const branch = branches.find(b => b.id === s.branchId);
+                                const owner = owners.find(o => o.id === s.ownerId);
+                                return `<tr><td><strong>${s.code}</strong></td><td>${branch?.name || '-'}</td><td>${s.type === 'small' ? '소형' : '중형'}</td><td>${formatMoney(s.price)}</td><td>${owner?.name || '-'}</td><td><span class="badge ${s.ownerId ? 'badge-success' : 'badge-warning'}">${s.ownerId ? '사용중' : '공실'}</span></td></tr>`;
+                            }).join('')}</tbody>
+                        </table>
+                        ${shelves.length > 50 ? '<p style="padding:1rem;text-align:center;color:var(--text-light)">외 ' + (shelves.length - 50) + '개 서가...</p>' : ''}
+                    </div>`;
+            } else if (section === 'settings') {
+                main.innerHTML = `
+                    <div class="main-header"><h1 class="main-title">설정</h1></div>
+                    <div class="card"><div class="card-header"><span class="card-title">시스템 설정</span></div><div class="card-body">
+                        <div class="form-group"><label class="form-label">수수료율 (%)</label><input type="number" class="form-input" value="10" style="max-width:200px"></div>
+                        <div class="form-group"><label class="form-label">정산일</label><input type="number" class="form-input" value="10" style="max-width:200px" placeholder="매월 N일"></div>
+                        <button class="btn btn-primary" onclick="showToast('설정이 저장되었습니다','success')">저장</button>
+                    </div></div>
+                    <div class="card"><div class="card-header"><span class="card-title">데이터 관리</span></div><div class="card-body">
+                        <p style="margin-bottom:1rem;color:var(--text-light)">주의: 초기화하면 모든 데이터가 삭제됩니다.</p>
+                        <button class="btn btn-danger" onclick="if(confirm('정말 모든 데이터를 초기화할까요?')){localStorage.clear();location.reload()}">데이터 초기화</button>
+                    </div></div>`;
+            } else {
+                main.innerHTML = `<div class="main-header"><h1 class="main-title">${section}</h1></div><div class="card"><div class="card-body"><p>준비 중인 기능입니다.</p></div></div>`;
+            }
+        }
+
+        // Modal Functions
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        function openAddBookModal() {
+            const owners = PodoDB.get('owners') || [];
+            document.getElementById('bookOwner').innerHTML = '<option value="">선택</option>' + owners.filter(o=>o.status==='active').map(o => `<option value="${o.id}">${o.name} (${o.shelves?.join(',')||'-'})</option>`).join('');
+            openModal('addBookModal');
+        }
+
+        function openAddOwnerModal() {
+            const branches = PodoDB.get('branches') || [];
+            document.getElementById('ownerBranch').innerHTML = '<option value="">선택</option>' + branches.filter(b=>b.status==='active').map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+            openModal('addOwnerModal');
+        }
+
+        function openSettlementModal() {
+            const stats = calcStats();
+            const owners = PodoDB.get('owners') || [];
+            const now = new Date();
+            document.getElementById('settlePeriod').textContent = `${now.getFullYear()}년 ${now.getMonth()+1}월 정산`;
+            document.getElementById('settleTotal').textContent = formatMoney(stats.settlementAmount);
+            document.getElementById('settleCount').textContent = `${owners.filter(o=>o.status==='active').length}명 정산 대상`;
+            openModal('settlementModal');
+        }
+
+        function saveBook(printQR = false) {
+            const books = PodoDB.get('books') || [];
+            const owners = PodoDB.get('owners') || [];
+            const ownerId = document.getElementById('bookOwner').value;
+            const owner = owners.find(o => o.id === ownerId);
+            if (!ownerId || !document.getElementById('bookTitle').value || !document.getElementById('bookPrice').value) {
+                showToast('필수 항목을 입력하세요', 'error'); return;
+            }
+            const newBook = {
+                id: PodoDB.generateId('BK'),
+                type: 'book',
+                isbn: document.getElementById('bookIsbn').value || '',
+                title: document.getElementById('bookTitle').value,
+                author: document.getElementById('bookAuthor').value,
+                publisher: document.getElementById('bookPublisher').value,
+                price: parseInt(document.getElementById('bookPrice').value),
+                qty: 1,
+                status: document.getElementById('bookCondition').value,
+                shelf: owner?.shelves?.[0] || '',
+                ownerId: ownerId,
+                ownerNumber: owner?.ownerNumber || '',
+                branchId: owner?.branchId || '',
+                saleStatus: 'available',
+                createdAt: getTodayStr()
+            };
+            books.push(newBook);
+            PodoDB.set('books', books);
+            closeModal('addBookModal');
+            showToast('도서가 등록되었습니다!', 'success');
+            
+            // QR 출력
+            if (printQR) {
+                printQRLabel(newBook);
+            }
+            
+            renderSection(currentSection);
+            ['bookIsbn','bookTitle','bookAuthor','bookPublisher','bookPrice'].forEach(id => document.getElementById(id).value = '');
+        }
+
+        // 굿즈 등록
+        function saveGoods(printQR = false) {
+            const goods = PodoDB.get('goods') || [];
+            const owners = PodoDB.get('owners') || [];
+            const name = document.getElementById('goodsName').value;
+            const price = parseInt(document.getElementById('goodsPrice').value);
+            const qty = parseInt(document.getElementById('goodsQty').value) || 1;
+            const status = document.getElementById('goodsStatus').value;
+            const branchId = document.getElementById('goodsBranch').value;
+            const ownerId = document.getElementById('goodsOwner').value;
+            const shelf = document.getElementById('goodsShelf').value;
+            
+            if (!name || !price || !branchId) {
+                showToast('필수 항목을 입력하세요', 'error'); return;
+            }
+            
+            const owner = owners.find(o => o.id === ownerId);
+            const newGoods = {
+                id: PodoDB.generateId('GD'),
+                type: 'goods',
+                name: name,
+                price: price,
+                qty: qty,
+                status: status,
+                shelf: shelf,
+                ownerId: ownerId || null,
+                ownerNumber: owner?.ownerNumber || '',
+                branchId: branchId,
+                saleStatus: 'available',
+                createdAt: getTodayStr()
+            };
+            goods.push(newGoods);
+            PodoDB.set('goods', goods);
+            closeModal('addGoodsModal');
+            showToast('굿즈가 등록되었습니다!', 'success');
+            
+            if (printQR) {
+                printQRLabel({ ...newGoods, title: newGoods.name });
+            }
+            
+            renderSection(currentSection);
+            ['goodsName', 'goodsPrice', 'goodsShelf'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('goodsQty').value = '1';
+        }
+
+        // 굿즈 모달 열기
+        function openGoodsModal() {
+            const branches = PodoDB.get('branches') || [];
+            const owners = PodoDB.get('owners') || [];
+            document.getElementById('goodsBranch').innerHTML = '<option value="">선택</option>' + branches.filter(b => b.status === 'active').map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+            document.getElementById('goodsOwner').innerHTML = '<option value="">포도책방 자체</option>' + owners.filter(o => o.status === 'active').map(o => `<option value="${o.id}">${o.ownerNumber} ${o.name}</option>`).join('');
+            openModal('addGoodsModal');
+        }
+
+        function saveOwner() {
+            const owners = PodoDB.get('owners') || [];
+            if (!document.getElementById('ownerName').value || !document.getElementById('ownerPhone').value || !document.getElementById('ownerBranch').value) {
+                showToast('필수 항목을 입력하세요', 'error'); return;
+            }
+            const newOwner = {
+                id: PodoDB.generateId('OW'),
+                name: document.getElementById('ownerName').value,
+                phone: document.getElementById('ownerPhone').value,
+                email: document.getElementById('ownerEmail').value,
+                branchId: document.getElementById('ownerBranch').value,
+                shelves: document.getElementById('ownerShelves').value.split(',').map(s => s.trim()).filter(s => s),
+                bank: document.getElementById('ownerBank').value,
+                password: document.getElementById('ownerPassword').value || '1234',
+                status: 'active',
+                createdAt: getTodayStr()
+            };
+            owners.push(newOwner);
+            PodoDB.set('owners', owners);
+            closeModal('addOwnerModal');
+            showToast('점주가 등록되었습니다!', 'success');
+            renderSection(currentSection);
+        }
+
+        // Cart & Sale
+        function addToCart() {
+            const input = document.getElementById('saleIsbn');
+            const books = PodoDB.get('books') || [];
+            const book = books.find(b => b.isbn === input.value || b.id === input.value);
+            if (book && book.status === 'available') {
+                cart.push(book);
+                renderCart();
+                input.value = '';
+            } else {
+                showToast('도서를 찾을 수 없습니다', 'error');
+            }
+        }
+
+        function renderCart() {
+            const owners = PodoDB.get('owners') || [];
+            document.getElementById('cartItems').innerHTML = cart.map((b, i) => {
+                const owner = owners.find(o => o.id === b.ownerId);
+                return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem;background:var(--grape-50);border-radius:8px;margin-bottom:0.5rem">
+                    <div><strong>${b.title}</strong><br><small style="color:var(--text-light)">${owner?.name||'-'} · ${formatMoney(b.price)}</small></div>
+                    <button onclick="cart.splice(${i},1);renderCart()" style="background:none;border:none;cursor:pointer;color:var(--danger)">✕</button>
+                </div>`;
+            }).join('');
+            document.getElementById('cartTotal').value = formatMoney(cart.reduce((sum, b) => sum + b.price, 0));
+        }
+
+        function clearCart() { cart = []; renderCart(); }
+
+        function completeSale() {
+            if (cart.length === 0) { showToast('판매할 도서를 추가하세요', 'error'); return; }
+            const sales = PodoDB.get('sales') || [];
+            const books = PodoDB.get('books') || [];
+            const owners = PodoDB.get('owners') || [];
+            const branches = PodoDB.get('branches') || [];
+            const method = document.getElementById('payMethod').value;
+            
+            cart.forEach(book => {
+                const owner = owners.find(o => o.id === book.ownerId);
+                const newSale = {
+                    id: PodoDB.generateId('SL'),
+                    bookId: book.id,
+                    bookTitle: book.title,
+                    ownerId: book.ownerId,
+                    ownerName: owner?.name || '',
+                    branchId: book.branchId,
+                    price: book.price,
+                    method: method,
+                    date: getTodayStr() + ' ' + getTimeStr(),
+                    status: 'completed'
+                };
+                sales.push(newSale);
+                // Mark book as sold
+                const bookIndex = books.findIndex(b => b.id === book.id);
+                if (bookIndex >= 0) books[bookIndex].status = 'sold';
+            });
+            
+            PodoDB.set('sales', sales);
+            PodoDB.set('books', books);
+            closeModal('saleModal');
+            clearCart();
+            showToast('판매가 완료되었습니다!', 'success');
+            renderSection(currentSection);
+        }
+
+        function executeSettlement() {
+            const settlements = PodoDB.get('settlements') || [];
+            const sales = PodoDB.get('sales') || [];
+            const owners = PodoDB.get('owners') || [];
+            const shelves = PodoDB.get('shelves') || [];
+            const now = new Date();
+            const period = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+            
+            owners.filter(o => o.status === 'active').forEach(owner => {
+                const ownerSales = sales.filter(s => s.ownerId === owner.id).reduce((sum, s) => sum + s.price, 0);
+                const ownerShelves = shelves.filter(s => s.ownerId === owner.id);
+                const rent = ownerShelves.reduce((sum, s) => sum + s.price, 0);
+                const commission = Math.round(ownerSales * 0.1);
+                
+                settlements.push({
+                    id: PodoDB.generateId('ST'),
+                    period: period,
+                    ownerId: owner.id,
+                    ownerName: owner.name,
+                    sales: ownerSales,
+                    commission: commission,
+                    rent: rent,
+                    amount: ownerSales - commission - rent,
+                    status: 'completed',
+                    paidAt: getTodayStr()
+                });
+            });
+            
+            PodoDB.set('settlements', settlements);
+            closeModal('settlementModal');
+            showToast('정산이 완료되었습니다!', 'success');
+            renderSection('settlements');
+        }
+
+        function doLogout() {
+            PodoSession.clear();
+            showToast('로그아웃되었습니다', 'success');
+            setTimeout(() => location.href = 'index.html', 500);
+        }
+
+        // Branch functions
+        function saveBranch() {
+            const branches = PodoDB.get('branches') || [];
+            const name = document.getElementById('branchNameInput').value;
+            const address = document.getElementById('branchAddress').value;
+            if (!name || !address) { showToast('필수 항목을 입력하세요', 'error'); return; }
+            
+            const newBranch = {
+                id: PodoDB.generateId('BR'),
+                name: name,
+                address: address,
+                icon: document.getElementById('branchIcon').value || '🏪',
+                color: document.getElementById('branchColor').value || '#7c4dff',
+                shelfCount: parseInt(document.getElementById('branchShelfCount').value) || 100,
+                status: document.getElementById('branchStatus').value
+            };
+            branches.push(newBranch);
+            PodoDB.set('branches', branches);
+            
+            // Create shelves for new branch
+            const shelves = PodoDB.get('shelves') || [];
+            ['A','B','C','D','E'].forEach(row => {
+                for(let i = 1; i <= 20; i++) {
+                    shelves.push({
+                        id: PodoDB.generateId('SH'),
+                        code: row + '-' + String(i).padStart(2, '0'),
+                        branchId: newBranch.id,
+                        ownerId: null,
+                        type: i <= 10 ? 'small' : 'medium',
+                        price: i <= 10 ? 20000 : 35000
+                    });
+                }
+            });
+            PodoDB.set('shelves', shelves);
+            
+            closeModal('addBranchModal');
+            showToast('지점이 추가되었습니다!', 'success');
+            renderSection('branches');
+            ['branchNameInput', 'branchAddress'].forEach(id => document.getElementById(id).value = '');
+        }
+
+        // Owner detail functions
+        let currentOwnerId = null;
+        function openOwnerDetail(ownerId) {
+            currentOwnerId = ownerId;
+            const owners = PodoDB.get('owners') || [];
+            const branches = PodoDB.get('branches') || [];
+            const books = PodoDB.get('books') || [];
+            const sales = PodoDB.get('sales') || [];
+            const owner = owners.find(o => o.id === ownerId);
+            if (!owner) return;
+            
+            const branch = branches.find(b => b.id === owner.branchId);
+            const ownerBooks = books.filter(b => b.ownerId === ownerId);
+            const ownerSales = sales.filter(s => s.ownerId === ownerId);
+            const totalSales = ownerSales.reduce((sum, s) => sum + s.price, 0);
+            
+            document.getElementById('ownerDetailBody').innerHTML = `
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">
+                    <div style="background:var(--grape-50);padding:1rem;border-radius:10px;text-align:center">
+                        <div style="font-size:0.8rem;color:var(--text-light)">총 판매액</div>
+                        <div style="font-size:1.5rem;font-weight:700;color:var(--grape-700)">${formatMoney(totalSales)}</div>
+                    </div>
+                    <div style="background:var(--grape-50);padding:1rem;border-radius:10px;text-align:center">
+                        <div style="font-size:0.8rem;color:var(--text-light)">등록 도서</div>
+                        <div style="font-size:1.5rem;font-weight:700;color:var(--grape-700)">${ownerBooks.length}권</div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">이름</label><input type="text" class="form-input" id="editOwnerName" value="${owner.name}"></div>
+                    <div class="form-group"><label class="form-label">연락처</label><input type="text" class="form-input" id="editOwnerPhone" value="${owner.phone}"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">이메일</label><input type="text" class="form-input" id="editOwnerEmail" value="${owner.email || ''}"></div>
+                    <div class="form-group"><label class="form-label">지점</label><select class="form-select" id="editOwnerBranch">${branches.filter(b=>b.status==='active').map(b => `<option value="${b.id}" ${b.id === owner.branchId ? 'selected' : ''}>${b.name}</option>`).join('')}</select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">서가</label><input type="text" class="form-input" id="editOwnerShelves" value="${owner.shelves?.join(', ') || ''}"></div>
+                    <div class="form-group"><label class="form-label">상태</label><select class="form-select" id="editOwnerStatus"><option value="active" ${owner.status === 'active' ? 'selected' : ''}>활성</option><option value="inactive" ${owner.status === 'inactive' ? 'selected' : ''}>휴면</option></select></div>
+                </div>
+                <div class="form-group"><label class="form-label">정산계좌</label><input type="text" class="form-input" id="editOwnerBank" value="${owner.bank || ''}"></div>
+            `;
+            openModal('ownerDetailModal');
+        }
+
+        function updateOwner() {
+            if (!currentOwnerId) return;
+            const owners = PodoDB.get('owners') || [];
+            const idx = owners.findIndex(o => o.id === currentOwnerId);
+            if (idx < 0) return;
+            
+            owners[idx].name = document.getElementById('editOwnerName').value;
+            owners[idx].phone = document.getElementById('editOwnerPhone').value;
+            owners[idx].email = document.getElementById('editOwnerEmail').value;
+            owners[idx].branchId = document.getElementById('editOwnerBranch').value;
+            owners[idx].shelves = document.getElementById('editOwnerShelves').value.split(',').map(s => s.trim()).filter(s => s);
+            owners[idx].status = document.getElementById('editOwnerStatus').value;
+            owners[idx].bank = document.getElementById('editOwnerBank').value;
+            
+            PodoDB.set('owners', owners);
+            closeModal('ownerDetailModal');
+            showToast('점주 정보가 수정되었습니다', 'success');
+            renderSection('owners');
+        }
+
+        function deleteOwner() {
+            if (!currentOwnerId) return;
+            if (!confirm('정말 이 점주를 삭제할까요? 관련 도서도 함께 삭제됩니다.')) return;
+            
+            let owners = PodoDB.get('owners') || [];
+            let books = PodoDB.get('books') || [];
+            
+            owners = owners.filter(o => o.id !== currentOwnerId);
+            books = books.filter(b => b.ownerId !== currentOwnerId);
+            
+            PodoDB.set('owners', owners);
+            PodoDB.set('books', books);
+            
+            closeModal('ownerDetailModal');
+            showToast('점주가 삭제되었습니다', 'success');
+            renderSection('owners');
+        }
+
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.className = 'toast show ' + type;
+            t.innerHTML = (type === 'success' ? '✓' : '❌') + ' ' + msg;
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // 차트 그리기
+        function drawSalesChart() {
+            const canvas = document.getElementById('salesChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const data = getSalesChartData(7);
+            
+            const width = canvas.width = canvas.offsetWidth * 2;
+            const height = canvas.height = canvas.offsetHeight * 2;
+            ctx.scale(2, 2);
+            
+            const padding = { top: 20, right: 20, bottom: 40, left: 60 };
+            const chartWidth = width/2 - padding.left - padding.right;
+            const chartHeight = height/2 - padding.top - padding.bottom;
+            
+            const maxAmount = Math.max(...data.map(d => d.amount), 10000);
+            
+            // 배경
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, width/2, height/2);
+            
+            // 그리드
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = padding.top + (chartHeight / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(width/2 - padding.right, y);
+                ctx.stroke();
+                
+                // Y축 레이블
+                ctx.fillStyle = '#666';
+                ctx.font = '10px Pretendard';
+                ctx.textAlign = 'right';
+                const val = maxAmount - (maxAmount / 4) * i;
+                ctx.fillText(formatMoney(val).replace('₩',''), padding.left - 5, y + 3);
+            }
+            
+            // 막대 그래프
+            const barWidth = chartWidth / data.length * 0.6;
+            const gap = chartWidth / data.length * 0.4;
+            
+            data.forEach((d, i) => {
+                const x = padding.left + (chartWidth / data.length) * i + gap/2;
+                const barHeight = (d.amount / maxAmount) * chartHeight;
+                const y = padding.top + chartHeight - barHeight;
+                
+                // 막대
+                const gradient = ctx.createLinearGradient(x, y, x, y + barHeight);
+                gradient.addColorStop(0, '#7c4dff');
+                gradient.addColorStop(1, '#9d7ae8');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x, y, barWidth, barHeight);
+                
+                // X축 레이블
+                ctx.fillStyle = '#666';
+                ctx.font = '10px Pretendard';
+                ctx.textAlign = 'center';
+                ctx.fillText(d.label, x + barWidth/2, height/2 - padding.bottom + 15);
+                
+                // 금액 표시
+                if (d.amount > 0) {
+                    ctx.fillStyle = '#333';
+                    ctx.font = 'bold 9px Pretendard';
+                    ctx.fillText(formatMoney(d.amount).replace('₩',''), x + barWidth/2, y - 5);
+                }
+            });
+        }
+
+        // 알림 관련
+        function updateNotifCount() {
+            const count = PodoNotification.getUnreadCount('admin');
+            const badge = document.getElementById('notifCount');
+            if (badge) {
+                badge.textContent = count;
+                badge.style.display = count > 0 ? 'flex' : 'none';
+            }
+        }
+
+        function openNotifModal() {
+            const notifs = PodoNotification.getForUser('admin', null, 20);
+            document.getElementById('notifList').innerHTML = notifs.length === 0 
+                ? '<p style="text-align:center;color:var(--text-light);padding:2rem">알림이 없습니다</p>'
+                : notifs.map(n => `
+                    <div style="padding:1rem;border-bottom:1px solid #f0f0f0;${n.read ? 'opacity:0.6' : ''}">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem">
+                            <span style="font-weight:${n.read ? '400' : '600'}">${getNotifIcon(n.type)} ${n.message}</span>
+                        </div>
+                        <small style="color:var(--text-light)">${formatDateTime(n.createdAt)}</small>
+                    </div>
+                `).join('');
+            openModal('notifModal');
+        }
+
+        function getNotifIcon(type) {
+            const icons = { sale: '💰', settlement: '🧾', owner: '👤', book: '📚', system: '⚙️' };
+            return icons[type] || '🔔';
+        }
+
+        function markAllNotifRead() {
+            PodoNotification.markAllRead('admin');
+            updateNotifCount();
+            closeModal('notifModal');
+            showToast('모든 알림을 읽음 처리했습니다', 'success');
+        }
+
+        // 바코드 스캐너
+        async function startScanner(inputId, onDetect) {
+            const video = document.getElementById('scannerVideo') || document.getElementById('saleVideo');
+            if (!video) return;
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
+                });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                video.play();
+                
+                if (document.getElementById('scannerPlaceholder')) {
+                    document.getElementById('scannerPlaceholder').style.display = 'none';
+                }
+                
+                // BarcodeDetector API
+                if ('BarcodeDetector' in window) {
+                    const detector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'code_128', 'qr_code'] });
+                    const scan = async () => {
+                        if (!video.srcObject) return;
+                        try {
+                            const barcodes = await detector.detect(video);
+                            if (barcodes.length > 0) {
+                                const code = barcodes[0].rawValue;
+                                document.getElementById(inputId).value = code;
+                                stopBarcodeScanner();
+                                showToast('스캔 완료: ' + code, 'success');
+                                if (onDetect) onDetect();
+                                return;
+                            }
+                        } catch(e) {}
+                        if (video.srcObject) requestAnimationFrame(scan);
+                    };
+                    scan();
+                } else {
+                    showToast('이 브라우저는 바코드 스캔을 지원하지 않습니다. 수동 입력하세요.', 'error');
+                }
+            } catch (err) {
+                showToast('카메라 접근 권한이 필요합니다', 'error');
+            }
+        }
+
+        function stopBarcodeScanner() {
+            const videos = document.querySelectorAll('video');
+            videos.forEach(video => {
+                if (video.srcObject) {
+                    video.srcObject.getTracks().forEach(t => t.stop());
+                    video.srcObject = null;
+                    video.style.display = 'none';
+                }
+            });
+            if (document.getElementById('scannerPlaceholder')) {
+                document.getElementById('scannerPlaceholder').style.display = 'block';
+            }
+        }
+
+        // 반품 처리
+        function refundSale(saleId) {
+            if (!confirm('정말 반품 처리하시겠습니까?\n재고가 복구되고 점주 적립금이 차감됩니다.')) return;
+            const result = processRefund(saleId);
+            if (result) {
+                showToast('반품 처리되었습니다', 'success');
+                renderSection(currentSection);
+            } else {
+                showToast('반품 처리 실패', 'error');
+            }
+        }
+
+        // QR코드 라벨 출력
+        function printQRLabel(item) {
+            const qrData = encodeURIComponent(JSON.stringify({ id: item.id, ownerNumber: item.ownerNumber, price: item.price }));
+            const qrImageUrl = `https://chart.googleapis.com/chart?chs=100x100&cht=qr&chl=${qrData}&choe=UTF-8`;
+            
+            const printWindow = window.open('', '_blank', 'width=300,height=400');
+            printWindow.document.write(`
+                <html>
+                <head><title>QR 라벨 출력</title>
+                <style>body{margin:0;padding:10mm;font-family:sans-serif}
+                .label{width:50mm;padding:3mm;border:1px solid #000;text-align:center}
+                .title{font-size:12px;font-weight:bold;margin-bottom:2mm;max-height:16px;overflow:hidden}
+                .owner{font-size:10px;color:#666;margin-bottom:3mm}
+                .qr{width:20mm;height:20mm;margin:0 auto 2mm}
+                .price{font-size:16px;font-weight:bold}</style>
+                </head>
+                <body>
+                <div class="label">
+                    <div class="title">${item.title || item.name}</div>
+                    <div class="owner">${item.ownerNumber || '포도책방'}</div>
+                    <img src="${qrImageUrl}" class="qr">
+                    <div class="price">₩${item.price.toLocaleString()}</div>
+                </div>
+                <script>window.onload=function(){window.print();}<\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        // 본사 판매내역 기간/지점 필터
+        function filterAdminSales() {
+            const startDate = document.getElementById('adminSalesStart')?.value;
+            const endDate = document.getElementById('adminSalesEnd')?.value;
+            const branchFilter = document.getElementById('adminSalesBranch')?.value;
+            const rows = document.querySelectorAll('#adminSalesTable tbody tr');
+            let total = 0, count = 0;
+            
+            rows.forEach(row => {
+                const date = row.dataset.date;
+                const branch = row.dataset.branch;
+                let show = true;
+                if (startDate && date < startDate) show = false;
+                if (endDate && date > endDate) show = false;
+                if (branchFilter && branch !== branchFilter) show = false;
+                row.style.display = show ? '' : 'none';
+                if (show) {
+                    count++;
+                    const priceCell = row.cells[5]; // 금액 컬럼
+                    if (priceCell) {
+                        const price = parseInt(priceCell.textContent.replace(/[₩,]/g, '')) || 0;
+                        total += price;
+                    }
+                }
+            });
+            
+            const summary = document.getElementById('adminSalesSummary');
+            if (summary) summary.textContent = `총 ${count}건 / ${formatMoney(total)}`;
+        }
+        
+        function resetAdminSalesFilter() {
+            const startEl = document.getElementById('adminSalesStart');
+            const endEl = document.getElementById('adminSalesEnd');
+            const branchEl = document.getElementById('adminSalesBranch');
+            if (startEl) startEl.value = '';
+            if (endEl) endEl.value = '';
+            if (branchEl) branchEl.value = '';
+            filterAdminSales();
+        }
+    </script>
+</body>
+</html>

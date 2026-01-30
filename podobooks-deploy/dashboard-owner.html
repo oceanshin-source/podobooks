@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>포도책방 - 내 서가</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{--grape-900:#1a0a2e;--grape-800:#2d1b4e;--grape-700:#4a2c7a;--grape-500:#7c4dff;--grape-300:#b794f4;--grape-100:#e9d8fd;--grape-50:#f5f0ff;--success:#10b981;--warning:#f59e0b;--text-light:#666}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Pretendard',sans-serif;background:#f5f7fa;display:flex;min-height:100vh}
+        .sidebar{width:260px;background:linear-gradient(180deg,var(--grape-900),var(--grape-800));padding:1.5rem;position:fixed;top:0;left:0;bottom:0}
+        .sidebar-logo{display:flex;align-items:center;gap:0.6rem;padding-bottom:1.25rem;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:1.25rem}
+        .sidebar-logo-icon{width:40px;height:40px;background:linear-gradient(135deg,#10b981,#059669);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+        .sidebar-logo-text{color:white;font-family:'Noto Serif KR',serif;font-weight:700;font-size:1.1rem}
+        .sidebar-user{padding:0.85rem;background:rgba(255,255,255,0.05);border-radius:10px;margin-bottom:1.25rem}
+        .sidebar-user-name{color:white;font-weight:600}
+        .sidebar-user-role{color:var(--grape-300);font-size:0.8rem}
+        .sidebar-nav{display:flex;flex-direction:column;gap:0.3rem}
+        .sidebar-item{display:flex;align-items:center;gap:0.6rem;padding:0.75rem 0.85rem;color:rgba(255,255,255,0.7);border-radius:8px;cursor:pointer;font-size:0.9rem}
+        .sidebar-item:hover{background:rgba(255,255,255,0.1);color:white}
+        .sidebar-item.active{background:linear-gradient(135deg,#10b981,#059669);color:white}
+        .main{flex:1;margin-left:260px;padding:1.5rem 2rem}
+        .main-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+        .main-title{font-family:'Noto Serif KR',serif;font-size:1.5rem;font-weight:700;color:var(--grape-900)}
+        .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+        .stat-card{background:white;border-radius:14px;padding:1.25rem}
+        .stat-card-header{display:flex;justify-content:space-between;margin-bottom:0.75rem}
+        .stat-card-title{font-size:0.8rem;color:var(--text-light)}
+        .stat-card-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+        .stat-card-value{font-size:1.75rem;font-weight:700;color:var(--grape-900)}
+        .stat-card-change{font-size:0.8rem;color:var(--success)}
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+        .card{background:white;border-radius:14px;overflow:hidden;margin-bottom:1.5rem}
+        .card-header{padding:1.25rem;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center}
+        .card-title{font-weight:700;color:var(--grape-900)}
+        .card-body{padding:1.25rem}
+        .data-table{width:100%;border-collapse:collapse}
+        .data-table th,.data-table td{padding:0.85rem 1rem;text-align:left;border-bottom:1px solid #f0f0f0;font-size:0.9rem}
+        .data-table th{background:#fafafa;font-weight:600;color:var(--text-light);font-size:0.8rem}
+        .data-table tbody tr:hover{background:#ecfdf5}
+        .badge{padding:0.25rem 0.6rem;border-radius:50px;font-size:0.75rem;font-weight:600}
+        .badge-success{background:#d1fae5;color:#065f46}
+        .badge-warning{background:#fef3c7;color:#92400e}
+        .btn{padding:0.5rem 1rem;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;border:none}
+        .btn-primary{background:linear-gradient(135deg,#10b981,#059669);color:white}
+        .btn-secondary{background:white;color:var(--grape-700);border:1px solid var(--grape-300)}
+        .shelf-card{background:var(--grape-50);border-radius:12px;padding:1.5rem;text-align:center}
+        .shelf-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:1rem;margin-bottom:1rem}
+        .shelf-item{background:white;padding:1rem;border-radius:8px}
+        .shelf-name{font-weight:700;color:var(--grape-700);font-size:1.3rem}
+        .shelf-count{font-size:0.85rem;color:var(--text-light)}
+        .info-box{padding:1rem;background:#fef3c7;border-radius:8px;display:flex;align-items:center;gap:0.75rem}
+        .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center}
+        .modal-overlay.active{display:flex}
+        .modal{background:white;border-radius:16px;width:90%;max-width:550px;max-height:90vh;overflow-y:auto}
+        .modal-header{padding:1.25rem;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center}
+        .modal-title{font-family:'Noto Serif KR',serif;font-size:1.2rem;font-weight:700;color:var(--grape-900)}
+        .modal-close{width:32px;height:32px;border-radius:50%;border:none;background:#f0f0f0;cursor:pointer;font-size:1.1rem}
+        .modal-body{padding:1.25rem}
+        .modal-footer{padding:1.25rem;border-top:1px solid #f0f0f0;display:flex;justify-content:flex-end;gap:0.6rem}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+        .form-group{margin-bottom:1rem}
+        .form-label{display:block;font-weight:600;color:var(--grape-800);margin-bottom:0.4rem;font-size:0.85rem}
+        .form-input,.form-select{width:100%;padding:0.75rem 1rem;border:2px solid var(--grape-100);border-radius:10px;font-size:0.95rem;background:var(--grape-50)}
+        .form-input:focus,.form-select:focus{outline:none;border-color:var(--grape-500);background:white}
+        .scanner{background:#1a1a2e;border-radius:12px;padding:1.5rem;text-align:center;color:white;margin-bottom:1.25rem}
+        .scanner-view{width:100%;height:120px;background:#16213e;border-radius:8px;margin-bottom:0.75rem;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+        .scanner-line{position:absolute;width:80%;height:2px;background:var(--success);box-shadow:0 0 8px var(--success);animation:scan 2s infinite}
+        @keyframes scan{0%,100%{top:15%}50%{top:85%}}
+        .scanner-input{width:100%;padding:0.85rem;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);border-radius:8px;color:white;font-size:1.1rem;text-align:center}
+        .scanner-input::placeholder{color:rgba(255,255,255,0.4)}
+        .toast{position:fixed;top:1.5rem;right:1.5rem;padding:1rem 1.5rem;background:white;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,0.15);display:none;z-index:300}
+        .toast.show{display:flex;align-items:center;gap:0.5rem}
+        .toast.success{border-left:4px solid var(--success)}
+        .toast.error{border-left:4px solid #ef4444}
+        @media(max-width:1100px){.stat-grid{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}}
+        @media(max-width:900px){.sidebar{width:70px;padding:1rem 0.5rem}.sidebar-logo-text,.sidebar-item span:last-child,.sidebar-user-name,.sidebar-user-role{display:none}.sidebar-logo,.sidebar-item{justify-content:center}.main{margin-left:70px}}
+    </style>
+</head>
+<body>
+    <div class="toast" id="toast"></div>
+    <aside class="sidebar">
+        <div class="sidebar-logo"><div class="sidebar-logo-icon">📚</div><span class="sidebar-logo-text">포도책방</span></div>
+        <div class="sidebar-user"><div class="sidebar-user-name" id="userName">점주</div><div class="sidebar-user-role" id="userShelves">서가 정보</div></div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-item active" data-section="overview"><span>📊</span><span>내 현황</span></div>
+            <div class="sidebar-item" data-section="notifications"><span>🔔</span><span>알림</span></div>
+            <div class="sidebar-item" data-section="books"><span>📚</span><span>내 도서</span></div>
+            <div class="sidebar-item" data-section="goods"><span>🎁</span><span>내 굿즈</span></div>
+            <div class="sidebar-item" data-section="sales"><span>💰</span><span>판매 내역</span></div>
+            <div class="sidebar-item" data-section="settlements"><span>🧾</span><span>정산 내역</span></div>
+            <div class="sidebar-item" data-section="search"><span>🔍</span><span>책 검색</span></div>
+            <div class="sidebar-item" data-section="shelf"><span>📦</span><span>내 서가</span></div>
+        </nav>
+        <div style="margin-top:auto;padding-top:1rem"><div class="sidebar-item" onclick="doLogout()"><span>🚪</span><span>로그아웃</span></div></div>
+    </aside>
+    <main class="main" id="mainContent"></main>
+
+    <!-- Add Book Modal -->
+    <div class="modal-overlay" id="addBookModal">
+        <div class="modal">
+            <div class="modal-header"><h3 class="modal-title">📖 도서 등록</h3><button class="modal-close" onclick="closeModal('addBookModal')">×</button></div>
+            <div class="modal-body">
+                <div class="scanner">
+                    <div class="scanner-view"><div class="scanner-line"></div><span style="opacity:0.5">ISBN 바코드 스캔</span></div>
+                    <input type="text" class="scanner-input" id="bookIsbn" placeholder="ISBN 입력">
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">도서명 *</label><input type="text" class="form-input" id="bookTitle"></div>
+                    <div class="form-group"><label class="form-label">저자 *</label><input type="text" class="form-input" id="bookAuthor"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">출판사</label><input type="text" class="form-input" id="bookPublisher"></div>
+                    <div class="form-group"><label class="form-label">판매가 *</label><input type="number" class="form-input" id="bookPrice"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">상태 (정산율)</label><select class="form-select" id="bookCondition"><option value="order_new">주문새책 (책방0%/점주100%)</option><option value="owner_new">점주새책 (책방15%/점주85%)</option><option value="used" selected>헌책 (책방50%/점주50%)</option></select></div>
+                    <div class="form-group"><label class="form-label">서가 위치</label><select class="form-select" id="bookShelf"></select></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('addBookModal')">취소</button><button class="btn" style="background:#f59e0b;color:white" onclick="saveBook(true)">등록+QR</button><button class="btn btn-primary" onclick="saveBook(false)">등록</button></div>
+        </div>
+    </div>
+
+    <!-- Edit Book Modal -->
+    <div class="modal-overlay" id="editBookModal">
+        <div class="modal">
+            <div class="modal-header"><h3 class="modal-title">📝 도서 수정</h3><button class="modal-close" onclick="closeModal('editBookModal')">×</button></div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">도서명 *</label><input type="text" class="form-input" id="editBookTitle"></div>
+                    <div class="form-group"><label class="form-label">저자</label><input type="text" class="form-input" id="editBookAuthor"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">출판사</label><input type="text" class="form-input" id="editBookPublisher"></div>
+                    <div class="form-group"><label class="form-label">판매가 *</label><input type="number" class="form-input" id="editBookPrice"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label">상태</label><select class="form-select" id="editBookCondition"><option value="order_new">주문새책</option><option value="owner_new">점주새책</option><option value="used">헌책</option></select></div>
+                    <div class="form-group"><label class="form-label">서가 위치</label><select class="form-select" id="editBookShelf"></select></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" style="margin-right:auto" onclick="deleteBook()">삭제</button>
+                <button class="btn btn-secondary" onclick="closeModal('editBookModal')">취소</button>
+                <button class="btn btn-primary" onclick="updateBook()">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="podo-db.js"></script>
+    <script>
+        let ownerId = null;
+        let ownerData = null;
+        document.addEventListener('DOMContentLoaded', () => {
+            const session = PodoSession.get();
+            if (!session || session.type !== 'owner') { location.href = 'login-owner.html'; return; }
+            ownerId = session.user.id;
+            ownerData = session.user;
+            const branch = (PodoDB.get('branches')||[]).find(b => b.id === ownerData.branchId);
+            document.getElementById('userName').textContent = ownerData.name || '점주';
+            document.getElementById('userShelves').textContent = (branch?.name||'') + ' ' + (ownerData.shelves?.join(', ')||'');
+            renderSection('overview');
+            setupNav();
+        });
+        function setupNav() {
+            document.querySelectorAll('.sidebar-item[data-section]').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    renderSection(this.dataset.section);
+                });
+            });
+        }
+        function renderSection(section) {
+            const main = document.getElementById('mainContent');
+            const stats = calcOwnerStats(ownerId);
+            const sales = (PodoDB.get('sales')||[]).filter(s => s.ownerId === ownerId);
+            const books = (PodoDB.get('books')||[]).filter(b => b.ownerId === ownerId);
+            const settlements = (PodoDB.get('settlements')||[]).filter(s => s.ownerId === ownerId);
+            const branch = (PodoDB.get('branches')||[]).find(b => b.id === ownerData.branchId);
+
+            if (section === 'overview') {
+                main.innerHTML = `
+                    <div class="main-header"><h1 class="main-title">안녕하세요, ${ownerData.name}님! 👋</h1><button class="btn btn-primary" onclick="openAddBookModal()">+ 도서 등록</button></div>
+                    <div class="stat-grid">
+                        <div class="stat-card"><div class="stat-card-header"><span class="stat-card-title">💰 적립금 잔액</span><div class="stat-card-icon" style="background:#d1fae5;color:#065f46">💵</div></div><div class="stat-card-value" style="color:#10b981">${formatMoney(stats.balance||0)}</div><div class="stat-card-change">사용 가능</div></div>
+                        <div class="stat-card"><div class="stat-card-header"><span class="stat-card-title">이번 달 수익</span><div class="stat-card-icon" style="background:#e9d8fd;color:#5b21b6">🧾</div></div><div class="stat-card-value">${formatMoney(stats.monthOwnerAmount||0)}</div><div class="stat-card-change">${stats.monthCount||0}건 판매</div></div>
+                        <div class="stat-card"><div class="stat-card-header"><span class="stat-card-title">등록 상품</span><div class="stat-card-icon" style="background:#dbeafe;color:#1e40af">📚</div></div><div class="stat-card-value">${stats.totalItems||stats.bookCount||0}개</div><div class="stat-card-change">책 ${stats.bookCount||0} / 굿즈 ${stats.goodsCount||0}</div></div>
+                        <div class="stat-card"><div class="stat-card-header"><span class="stat-card-title">예상 정산</span><div class="stat-card-icon" style="background:#fef3c7;color:#92400e">📈</div></div><div class="stat-card-value">${formatMoney(stats.expectedSettlement||0)}</div><div class="stat-card-change">수익 - 임대료</div></div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="card"><div class="card-header"><span class="card-title">최근 판매</span><button class="btn btn-secondary" onclick="renderSection('sales')">전체보기</button></div>
+                            <table class="data-table"><thead><tr><th>날짜</th><th>상품명</th><th>내 수익</th></tr></thead>
+                            <tbody>${sales.slice(-5).reverse().map(s => `<tr><td>${(s.createdAt||s.date||'').split(' ')[0]}</td><td>${s.itemTitle||s.bookTitle||'-'}</td><td style="color:#10b981;font-weight:600">${formatMoney(s.ownerAmount||s.price)}</td></tr>`).join('')||'<tr><td colspan="3" style="text-align:center">판매 내역이 없습니다</td></tr>'}</tbody>
+                            </table>
+                        </div>
+                        <div class="card"><div class="card-header"><span class="card-title">내 서가 현황</span></div><div class="card-body">
+                            <div class="shelf-card">
+                                <div class="shelf-grid">${(stats.shelves||[]).map(s => `<div class="shelf-item"><div class="shelf-name">${s}</div><div class="shelf-count">${books.filter(b=>b.shelf===s).length}권</div></div>`).join('')||'<div style="color:var(--text-light)">서가 없음</div>'}</div>
+                                <p style="font-size:0.9rem;color:var(--text-light)">${branch?.name||''} • 월 임대료 ${formatMoney(stats.rent||0)}</p>
+                            </div>
+                            <div class="info-box" style="margin-top:1rem"><span>💡</span><div><strong style="color:#92400e">정산 안내</strong><p style="font-size:0.85rem;color:#92400e">적립금에서 임대료 차감 후 정산됩니다.<br>적립금: ${formatMoney(stats.balance||0)} - 임대료: ${formatMoney(stats.rent||0)} = <strong>${formatMoney((stats.balance||0)-(stats.rent||0))}</strong></p></div></div>
+                        </div></div>
+                    </div>
+                    <div class="card"><div class="card-header"><span class="card-title">📈 주간 판매 추이</span></div><div class="card-body"><canvas id="ownerChart" height="60"></canvas></div></div>`;
+                setTimeout(() => drawOwnerChart(), 100);
+            } else if (section === 'books') {
+                main.innerHTML = `
+                    <div class="main-header"><h1 class="main-title">📚 내 도서</h1><button class="btn btn-primary" onclick="openAddBookModal()">+ 도서 등록</button></div>
+                    <div class="card"><table class="data-table">
+                        <thead><tr><th>도서명</th><th>저자</th><th>상태</th><th>가격</th><th>서가</th><th>QR</th><th>관리</th></tr></thead>
+                        <tbody>${books.map(b => {
+                            const statusName = BOOK_STATUS && BOOK_STATUS[b.status] ? BOOK_STATUS[b.status].name : (b.saleStatus==='available'?'판매중':'판매됨');
+                            return `<tr><td><strong>${b.title}</strong></td><td>${b.author}</td><td><span class="badge badge-success">${statusName}</span></td><td>${formatMoney(b.price)}</td><td>${b.shelf||'-'}</td><td><button class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.75rem" onclick="printQRLabel({id:'${b.id}',title:'${b.title}',ownerNumber:'${ownerData.ownerNumber||''}',price:${b.price}})">🏷️</button></td><td><button class="btn btn-secondary" onclick="openEditBook('${b.id}')">수정</button></td></tr>`;
+                        }).join('')||'<tr><td colspan="7" style="text-align:center">등록된 도서가 없습니다</td></tr>'}</tbody>
+                    </table></div>`;
+            } else if (section === 'goods') {
+                const goods = (PodoDB.get('goods')||[]).filter(g => g.ownerId === ownerId);
+                main.innerHTML = `
+                    <div class="main-header"><h1 class="main-title">🎁 내 굿즈</h1><button class="btn btn-primary" onclick="openGoodsModal()">+ 굿즈 등록</button></div>
+                    <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1rem">
+                        <div class="stat-card"><div class="stat-card-title">협력</div><div class="stat-card-value">${goods.filter(g=>g.status==='collab').length}</div><div style="font-size:0.7rem;color:var(--text-light)">책방30% / 내70%</div></div>
+                        <div class="stat-card"><div class="stat-card-title">자작</div><div class="stat-card-value">${goods.filter(g=>g.status==='handmade').length}</div><div style="font-size:0.7rem;color:var(--text-light)">책방20% / 내80%</div></div>
+                        <div class="stat-card"><div class="stat-card-title">위탁</div><div class="stat-card-value">${goods.filter(g=>g.status==='consign').length}</div><div style="font-size:0.7rem;color:var(--text-light)">책방20% / 내80%</div></div>
+                    </div>
+                    <div class="card"><table class="data-table">
+                        <thead><tr><th>상품명</th><th>상태</th><th>가격</th><th>수량</th><th>QR</th></tr></thead>
+                        <tbody>${goods.map(g => {
+                            const statusName = GOODS_STATUS && GOODS_STATUS[g.status] ? GOODS_STATUS[g.status].name : g.status;
+                            return `<tr><td><strong>${g.name}</strong></td><td><span class="badge badge-success">${statusName}</span></td><td>${formatMoney(g.price)}</td><td>${g.qty}개</td><td><button class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.75rem" onclick="printQRLabel({id:'${g.id}',title:'${g.name}',ownerNumber:'${ownerData.ownerNumber||''}',price:${g.price}})">🏷️</button></td></tr>`;
+                        }).join('')||'<tr><td colspan="5" style="text-align:center">등록된 굿즈가 없습니다</td></tr>'}</tbody>
+                    </table></div>`;
+            } else if (section === 'notifications') {
+                // 알림 섹션
+                const notifications = (PodoDB.get('notifications')||[]).filter(n => 
+                    n.targetType === 'all' || n.targetType === 'owner' || n.targetId === ownerId
+                ).slice(0, 30);
+                const unreadCount = notifications.filter(n => !n.read).length;
+                
+                main.innerHTML = `
+                    <div class="main-header"><h1 class="main-title">🔔 알림 <span style="font-size:0.9rem;color:var(--text-light)">(${unreadCount}개 안읽음)</span></h1><button class="btn btn-secondary" onclick="markAllNotificationsRead()">모두 읽음</button></div>
+                    <div class="card">
+                        ${notifications.length === 0 ? '<div style="padding:2rem;text-align:center;color:var(--text-light)">알림이 없습니다</div>' : notifications.map(n => `
+                            <div style="padding:1rem;border-bottom:1px solid #f0f0f0;background:${n.read?'white':'#f5f0ff'};display:flex;gap:1rem;align-items:flex-start">
+                                <span style="font-size:1.3rem">${n.type==='sale'?'💰':n.type==='settlement'?'🧾':n.type==='system'?'⚙️':'📢'}</span>
+                                <div style="flex:1">
+                                    <p style="font-weight:${n.read?'400':'600'}">${n.message}</p>
+                                    <p style="font-size:0.8rem;color:var(--text-light);margin-top:0.3rem">${formatDateTime(n.createdAt)}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>`;
+            } else if (section === 'sales') {
+                const allSales = sales.slice().reverse();
+                main.innerHTML = `
+                    <div class="main-header"><h1 class="main-title">💰 판매 내역</h1><button class="btn btn-secondary" onclick="exportSales(null, ownerId)">📥 엑셀 다운로드</button></div>
+                    <div class="card" style="padding:1rem;margin-bottom:1rem">
+                        <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+                            <div><label style="font-size:0.85rem;color:var(--text-light)">시작일</label><input type="date" id="salesStartDate" class="form-input" style="width:auto;padding:0.5rem" onchange="filterOwnerSales()"></div>
+                            <div><label style="font-size:0.85rem;color:var(--text-light)">종료일</label><input type="date" id="salesEndDate" class="form-input" style="width:auto;padding:0.5rem" onchange="filterOwnerSales()"></div>
+                            <button class="btn btn-secondary" style="padding:0.5rem 1rem" onclick="resetOwnerSalesFilter()">초기화</button>
+                            <div style="margin-left:auto;font-weight:600" id="ownerSalesSummary">총 ${allSales.length}건 / 내 수익 ${formatMoney(allSales.reduce((s,x)=>s+(x.ownerAmount||x.price),0))}</div>
+                        </div>
+                    </div>
+                    <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1rem">
+                        <div class="stat-card"><div class="stat-card-title">총 판매액</div><div class="stat-card-value">${formatMoney(stats.totalSales||0)}</div></div>
+                        <div class="stat-card"><div class="stat-card-title">내 수익 합계</div><div class="stat-card-value" style="color:#10b981">${formatMoney(stats.totalOwnerAmount||0)}</div></div>
+                        <div class="stat-card"><div class="stat-card-title">이번 달 수익</div><div class="stat-card-value">${formatMoney(stats.monthOwnerAmount||0)}</div></div>
+                        <div class="stat-card"><div class="stat-card-title">판매 건수</div><div class="stat-card-value">${sales.length}건</div></div>
+                    </div>
+                    <div class="card"><table class="data-table" id="ownerSalesTable">
+                        <thead><tr><th>일시</th><th>상품명</th><th>상태</th><th>판매가</th><th>내 수익</th></tr></thead>
+                        <tbody>${allSales.map(s => `<tr data-date="${(s.createdAt||s.date||'').split(' ')[0]}"><td style="font-size:0.8rem">${s.createdAt||s.date||''}</td><td>${s.itemTitle||s.bookTitle||'-'}</td><td style="font-size:0.75rem">${s.status||'-'}</td><td>${formatMoney(s.price)}</td><td style="color:#10b981;font-weight:600">${formatMoney(s.ownerAmount||s.price)}</td></tr>`).join('')||'<tr><td colspan="5" style="text-align:center">판매 내역이 없습니다</td></tr>'}</tbody>
+                    </table></div>`;
+            } else if (section === 'search') {
+                main.innerHTML = `
+                    <div class="main-header"><h1 class="main-title">🔍 책 검색</h1></div>
+                    <div class="card" style="padding:1.5rem">
+                        <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
+                            <input type="text" id="searchInput" class="form-input" placeholder="도서명, 저자, ISBN으로 검색..." style="flex:1" onkeypress="if(event.key==='Enter')doSearch()">
+                            <button class="btn btn-primary" style="width:auto;padding:0.75rem 1.5rem" onclick="doSearch()">검색</button>
+                        </div>
+                        <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.9rem;color:var(--text-light)">
+                            <input type="checkbox" id="searchAllBranches"> 다른 지점도 검색
+                        </label>
+                    </div>
+                    <div id="searchResults"></div>`;
+            } else if (section === 'settlements') {
+                main.innerHTML = `
+                    <div class="main-header"><h1 class="main-title">🧾 정산 내역</h1></div>
+                    <div class="info-box" style="margin-bottom:1.5rem"><span>💰</span><div><strong>현재 적립금: ${formatMoney(stats.balance||0)}</strong><p style="font-size:0.9rem">적립금에서 월 임대료(${formatMoney(stats.rent||0)}) 차감 후 정산</p></div></div>
+                    <div class="card"><table class="data-table">
+                        <thead><tr><th>기간</th><th>판매액</th><th>책방몫</th><th>내 수익</th><th>임대료</th><th>정산액</th><th>상태</th></tr></thead>
+                        <tbody>${settlements.map(s => `<tr><td>${s.period}</td><td>${formatMoney(s.totalSales||s.sales)}</td><td style="color:var(--text-light)">-${formatMoney(s.shopAmount||s.commission)}</td><td style="color:#10b981">${formatMoney(s.ownerAmount)}</td><td>-${formatMoney(s.rent)}</td><td style="font-weight:700;color:var(--grape-700)">${formatMoney(s.finalAmount||s.amount)}</td><td><span class="badge ${s.status==='completed'?'badge-success':'badge-warning'}">${s.status==='completed'?'완료':'대기'}</span></td></tr>`).join('')||'<tr><td colspan="7" style="text-align:center">정산 내역이 없습니다</td></tr>'}</tbody>
+                    </table></div>`;
+            } else if (section === 'shelf') {
+                const shelfList = stats.shelves || [];
+                main.innerHTML = `
+                    <div class="main-header"><h1 class="main-title">📦 내 서가</h1></div>
+                    <div class="stat-grid" style="grid-template-columns:repeat(${Math.max(shelfList.length,1)},1fr);margin-bottom:1.5rem">
+                        ${shelfList.map(s => `<div class="stat-card" style="text-align:center"><div style="font-size:2rem;font-weight:700;color:var(--grape-700)">${s}</div><div style="margin-top:0.5rem;font-size:0.9rem;color:var(--text-light)">${books.filter(b=>b.shelf===s&&(b.saleStatus==='available'||b.status==='available')).length}권 판매중</div></div>`).join('')||'<div class="stat-card" style="text-align:center"><div style="color:var(--text-light)">서가 없음</div></div>'}
+                    </div>
+                    <div class="card"><div class="card-header"><span class="card-title">서가 정보</span></div><div class="card-body">
+                        <p><strong>점주번호:</strong> ${ownerData.ownerNumber||'-'}</p>
+                        <p style="margin-top:0.5rem"><strong>지점:</strong> ${branch?.name||'-'}</p>
+                        <p style="margin-top:0.5rem"><strong>서가:</strong> ${shelfList.join(', ')||'-'}</p>
+                        <p style="margin-top:0.5rem"><strong>월 임대료:</strong> ${formatMoney(stats.rent||0)}</p>
+                        <p style="margin-top:0.5rem"><strong>등록 상품:</strong> 책 ${stats.bookCount||0}권, 굿즈 ${stats.goodsCount||0}개</p>
+                    </div></div>`;
+            } else {
+                main.innerHTML = `<div class="main-header"><h1 class="main-title">${section}</h1></div><div class="card" style="padding:2rem;text-align:center"><p>준비 중인 기능입니다.</p></div>`;
+            }
+        }
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        function openAddBookModal() {
+            document.getElementById('bookShelf').innerHTML = ownerData.shelves.map(s => `<option value="${s}">${s}</option>`).join('');
+            openModal('addBookModal');
+        }
+        function saveBook(printQR = false) {
+            const books = PodoDB.get('books') || [];
+            if (!document.getElementById('bookTitle').value || !document.getElementById('bookPrice').value) {
+                showToast('필수 항목을 입력하세요', 'error'); return;
+            }
+            const newBook = {
+                id: PodoDB.generateId('BK'),
+                type: 'book',
+                isbn: document.getElementById('bookIsbn').value || '',
+                title: document.getElementById('bookTitle').value,
+                author: document.getElementById('bookAuthor').value,
+                publisher: document.getElementById('bookPublisher').value,
+                price: parseInt(document.getElementById('bookPrice').value),
+                qty: 1,
+                status: document.getElementById('bookCondition').value,
+                shelf: document.getElementById('bookShelf').value,
+                ownerId: ownerId,
+                ownerNumber: ownerData.ownerNumber || '',
+                branchId: ownerData.branchId,
+                saleStatus: 'available',
+                createdAt: getTodayStr()
+            };
+            books.push(newBook);
+            PodoDB.set('books', books);
+            closeModal('addBookModal');
+            showToast('도서가 등록되었습니다!', 'success');
+            
+            if (printQR) {
+                printQRLabel(newBook);
+            }
+            
+            renderSection('books');
+            ['bookIsbn','bookTitle','bookAuthor','bookPublisher','bookPrice'].forEach(id => document.getElementById(id).value = '');
+        }
+        
+        let currentBookId = null;
+        function openEditBook(bookId) {
+            currentBookId = bookId;
+            const books = PodoDB.get('books') || [];
+            const book = books.find(b => b.id === bookId);
+            if (!book) return;
+            
+            document.getElementById('editBookTitle').value = book.title;
+            document.getElementById('editBookAuthor').value = book.author || '';
+            document.getElementById('editBookPublisher').value = book.publisher || '';
+            document.getElementById('editBookPrice').value = book.price;
+            document.getElementById('editBookCondition').value = book.condition || '상';
+            document.getElementById('editBookShelf').innerHTML = ownerData.shelves.map(s => `<option value="${s}" ${s === book.shelf ? 'selected' : ''}>${s}</option>`).join('');
+            
+            openModal('editBookModal');
+        }
+        
+        function updateBook() {
+            if (!currentBookId) return;
+            const books = PodoDB.get('books') || [];
+            const idx = books.findIndex(b => b.id === currentBookId);
+            if (idx < 0) return;
+            
+            books[idx].title = document.getElementById('editBookTitle').value;
+            books[idx].author = document.getElementById('editBookAuthor').value;
+            books[idx].publisher = document.getElementById('editBookPublisher').value;
+            books[idx].price = parseInt(document.getElementById('editBookPrice').value);
+            books[idx].condition = document.getElementById('editBookCondition').value;
+            books[idx].shelf = document.getElementById('editBookShelf').value;
+            
+            PodoDB.set('books', books);
+            closeModal('editBookModal');
+            showToast('도서 정보가 수정되었습니다', 'success');
+            renderSection('books');
+        }
+        
+        function deleteBook() {
+            if (!currentBookId) return;
+            if (!confirm('정말 이 도서를 삭제할까요?')) return;
+            
+            let books = PodoDB.get('books') || [];
+            books = books.filter(b => b.id !== currentBookId);
+            PodoDB.set('books', books);
+            
+            closeModal('editBookModal');
+            showToast('도서가 삭제되었습니다', 'success');
+            renderSection('books');
+        }
+
+        // 차트
+        function drawOwnerChart() {
+            const canvas = document.getElementById('ownerChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const data = getSalesChartData(7, null, ownerId);
+            
+            const width = canvas.width = canvas.offsetWidth * 2;
+            const height = canvas.height = canvas.offsetHeight * 2;
+            ctx.scale(2, 2);
+            
+            const padding = { top: 15, right: 15, bottom: 30, left: 50 };
+            const chartWidth = width/2 - padding.left - padding.right;
+            const chartHeight = height/2 - padding.top - padding.bottom;
+            const maxAmount = Math.max(...data.map(d => d.amount), 10000);
+            
+            ctx.fillStyle = '#ecfdf5';
+            ctx.fillRect(0, 0, width/2, height/2);
+            
+            const barWidth = chartWidth / data.length * 0.6;
+            data.forEach((d, i) => {
+                const x = padding.left + (chartWidth / data.length) * i + (chartWidth / data.length * 0.2);
+                const barHeight = (d.amount / maxAmount) * chartHeight;
+                const y = padding.top + chartHeight - barHeight;
+                
+                ctx.fillStyle = '#10b981';
+                ctx.fillRect(x, y, barWidth, barHeight);
+                
+                ctx.fillStyle = '#666';
+                ctx.font = '9px Pretendard';
+                ctx.textAlign = 'center';
+                ctx.fillText(d.label.split('(')[0], x + barWidth/2, height/2 - 8);
+            });
+        }
+        function doLogout() {
+            PodoSession.clear();
+            showToast('로그아웃되었습니다', 'success');
+            setTimeout(() => location.href = 'index.html', 500);
+        }
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.className = 'toast show ' + (type || 'success');
+            t.innerHTML = (type === 'error' ? '❌' : '✓') + ' ' + msg;
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // QR 라벨 출력
+        function printQRLabel(item) {
+            const qrData = encodeURIComponent(JSON.stringify({ id: item.id, ownerNumber: item.ownerNumber, price: item.price }));
+            const qrImageUrl = `https://chart.googleapis.com/chart?chs=100x100&cht=qr&chl=${qrData}&choe=UTF-8`;
+            
+            const printWindow = window.open('', '_blank', 'width=300,height=400');
+            printWindow.document.write(`
+                <html>
+                <head><title>QR 라벨</title>
+                <style>body{margin:0;padding:10mm;font-family:sans-serif}
+                .label{width:50mm;padding:3mm;border:1px solid #000;text-align:center}
+                .title{font-size:11px;font-weight:bold;margin-bottom:2mm;max-height:14px;overflow:hidden}
+                .owner{font-size:9px;color:#666;margin-bottom:3mm}
+                .qr{width:18mm;height:18mm;margin:0 auto 2mm}
+                .price{font-size:14px;font-weight:bold}</style>
+                </head>
+                <body>
+                <div class="label">
+                    <div class="title">${item.title || item.name}</div>
+                    <div class="owner">${item.ownerNumber || '포도책방'}</div>
+                    <img src="${qrImageUrl}" class="qr">
+                    <div class="price">₩${item.price.toLocaleString()}</div>
+                </div>
+                <script>window.onload=function(){window.print();}<\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        // 굿즈 등록
+        function openGoodsModal() {
+            const name = prompt('굿즈 상품명:');
+            if (!name) return;
+            const price = parseInt(prompt('판매가:'));
+            if (!price) return;
+            const statusList = {'1':'collab','2':'handmade','3':'consign'};
+            const statusInput = prompt('상태 선택:\n1.협력(30:70)\n2.자작(20:80)\n3.위탁(20:80)') || '2';
+            const status = statusList[statusInput] || 'handmade';
+            
+            const goods = PodoDB.get('goods') || [];
+            const newGoods = {
+                id: PodoDB.generateId('GD'),
+                type: 'goods',
+                name: name,
+                price: price,
+                qty: 1,
+                status: status,
+                shelf: ownerData.shelves?.[0] || '',
+                ownerId: ownerId,
+                ownerNumber: ownerData.ownerNumber || '',
+                branchId: ownerData.branchId,
+                saleStatus: 'available',
+                createdAt: getTodayStr()
+            };
+            goods.push(newGoods);
+            PodoDB.set('goods', goods);
+            showToast('굿즈가 등록되었습니다!', 'success');
+            renderSection('goods');
+        }
+
+        // 책 검색
+        function doSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) { showToast('검색어를 입력하세요', 'error'); return; }
+            
+            const includeAll = document.getElementById('searchAllBranches').checked;
+            const results = typeof searchItems === 'function' 
+                ? searchItems(query, ownerData.branchId, includeAll)
+                : [];
+            
+            const resultsDiv = document.getElementById('searchResults');
+            if (results.length === 0) {
+                resultsDiv.innerHTML = '<div class="card" style="padding:2rem;text-align:center;color:var(--text-light)">검색 결과가 없습니다</div>';
+                return;
+            }
+            
+            resultsDiv.innerHTML = `
+                <div class="card"><div class="card-header"><span class="card-title">검색 결과 (${results.length}건)</span></div>
+                <table class="data-table">
+                    <thead><tr><th>도서명</th><th>저자</th><th>가격</th><th>점주</th><th>지점</th></tr></thead>
+                    <tbody>${results.map(r => `<tr><td><strong>${r.title||r.name}</strong></td><td>${r.author||'-'}</td><td>${formatMoney(r.price)}</td><td>${r.ownerNumber||r.ownerName||'-'}</td><td>${r.branchName||'-'}</td></tr>`).join('')}</tbody>
+                </table></div>`;
+        }
+
+        // 판매내역 기간 필터
+        function filterOwnerSales() {
+            const startDate = document.getElementById('salesStartDate')?.value;
+            const endDate = document.getElementById('salesEndDate')?.value;
+            const rows = document.querySelectorAll('#ownerSalesTable tbody tr');
+            let total = 0, count = 0;
+            
+            rows.forEach(row => {
+                const date = row.dataset.date;
+                let show = true;
+                if (startDate && date < startDate) show = false;
+                if (endDate && date > endDate) show = false;
+                row.style.display = show ? '' : 'none';
+                if (show) {
+                    count++;
+                    const priceCell = row.cells[4]; // 내 수익 컬럼
+                    if (priceCell) {
+                        const price = parseInt(priceCell.textContent.replace(/[₩,]/g, '')) || 0;
+                        total += price;
+                    }
+                }
+            });
+            
+            const summary = document.getElementById('ownerSalesSummary');
+            if (summary) summary.textContent = `총 ${count}건 / 내 수익 ${formatMoney(total)}`;
+        }
+        
+        function resetOwnerSalesFilter() {
+            const startEl = document.getElementById('salesStartDate');
+            const endEl = document.getElementById('salesEndDate');
+            if (startEl) startEl.value = '';
+            if (endEl) endEl.value = '';
+            filterOwnerSales();
+        }
+
+        // 알림 모두 읽음
+        function markAllNotificationsRead() {
+            if (typeof PodoNotification !== 'undefined' && PodoNotification.markAllRead) {
+                PodoNotification.markAllRead('owner');
+            } else {
+                const notifications = PodoDB.get('notifications') || [];
+                notifications.forEach(n => {
+                    if (n.targetType === 'all' || n.targetType === 'owner' || n.targetId === ownerId) {
+                        n.read = true;
+                    }
+                });
+                PodoDB.set('notifications', notifications);
+            }
+            showToast('모든 알림을 읽음 처리했습니다', 'success');
+            renderSection('notifications');
+        }
+    </script>
+</body>
+</html>
